@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+    <class>MainWindow</class>
+    <widget class="QMainWindow" name="MainWindow">
+        <property name="geometry">
+            <rect>
+                <x>0</x>
+                <y>0</y>
+                <width>433</width>
+                <height>315</height>
+            </rect>
+        </property>
+        <property name="windowTitle">
+            <string>MainWindow</string>
+        </property>
+        <widget class="QWidget" name="centralwidget">
+            <widget class="QFrame" name="frame">
+                <property name="geometry">
+                    <rect>
+                        <x>0</x>
+                        <y>-10</y>
+                        <width>1021</width>
+                        <height>751</height>
+                    </rect>
+                </property>
+                <property name="sizePolicy">
+                    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                    </sizepolicy>
+                </property>
+                <property name="styleSheet">
+                    <string notr="true">background-color: #212121;</string>
+                </property>
+                <property name="frameShape">
+                    <enum>QFrame::StyledPanel</enum>
+                </property>
+                <property name="frameShadow">
+                    <enum>QFrame::Raised</enum>
+                </property>
+                <widget class="QLabel" name="label">
+                    <property name="geometry">
+                        <rect>
+                            <x>11</x>
+                            <y>21</y>
+                            <width>214</width>
+                            <height>17</height>
+                        </rect>
+                    </property>
+                    <property name="font">
+                        <font>
+                            <family>12</family>
+                            <pointsize>-1</pointsize>
+                            <weight>50</weight>
+                            <italic>false</italic>
+                            <bold>false</bold>
+                        </font>
+                    </property>
+                    <property name="styleSheet">
+                        <string notr="true">font: 14px bold;
+                            color: #F5F5F5;
+                        </string>
+                    </property>
+                    <property name="text">
+                        <string>Оценка выставляется на основе:</string>
+                    </property>
+                </widget>
+                <widget class="QTextBrowser" name="textBrowser">
+                    <property name="geometry">
+                        <rect>
+                            <x>11</x>
+                            <y>44</y>
+                            <width>411</width>
+                            <height>230</height>
+                        </rect>
+                    </property>
+                    <property name="sizePolicy">
+                        <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                            <horstretch>0</horstretch>
+                            <verstretch>0</verstretch>
+                        </sizepolicy>
+                    </property>
+                    <property name="minimumSize">
+                        <size>
+                            <width>0</width>
+                            <height>230</height>
+                        </size>
+                    </property>
+                    <property name="font">
+                        <font>
+                            <family>12</family>
+                            <pointsize>-1</pointsize>
+                            <weight>50</weight>
+                            <italic>false</italic>
+                            <bold>false</bold>
+                        </font>
+                    </property>
+                    <property name="styleSheet">
+                        <string notr="true">color: #F5F5F5;
+                            background-color: #424242;
+                            font: 12px bold;
+                            border: none;
+                        </string>
+                    </property>
+                    <property name="html">
+                        <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+                            &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style
+                            type=&quot;text/css&quot;&gt;
+                            p, li { white-space: pre-wrap; }
+                            &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'12'; font-size:12px;
+                            font-weight:400; font-style:normal;&quot;&gt;
+                            &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px;
+                            -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Segoe UI';
+                            font-size:8.25pt;&quot;&gt;1. Общие требования:&lt;/span&gt;&lt;/p&gt;
+                            &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px;
+                            -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Segoe UI';
+                            font-size:8.25pt;&quot;&gt; ● Ровно три слайда без анимации.&lt;/span&gt;&lt;/p&gt;
+                            &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px;
+                            -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Segoe UI';
+                            font-size:8.25pt;&quot;&gt; ● Параметры страницы (слайда): экран (16:9), ориентация
+                            альбомная.&lt;/span&gt;&lt;/p&gt;
+                            &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px;
+                            margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Segoe
+                            UI'; font-size:8.25pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+                            &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px;
+                            -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Segoe UI';
+                            font-size:8.25pt;&quot;&gt;2. Содержание, структура, форматирование шрифта и размещение
+                            изображений на слайдах:&lt;/span&gt;&lt;/p&gt;
+                            &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px;
+                            -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Segoe UI';
+                            font-size:8.25pt;&quot;&gt; ● Первый слайд - титульный слайд с названием презентации; в
+                            подзаголовке титульного слайда в качестве информации об авторе презентации указывается
+                            идентификационный номер участника экзамена.&lt;/span&gt;&lt;/p&gt;
+                            &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px;
+                            -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Segoe UI';
+                            font-size:8.25pt;&quot;&gt; ● Второй слайд - основная информация в соответствие с заданием,
+                            размещенная по образцу на рисунке макета слайда 2: заголовок слайда, два блока текста и два
+                            изображения;&lt;/span&gt;&lt;/p&gt;
+                            &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px;
+                            -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Segoe UI';
+                            font-size:8.25pt;&quot;&gt; ● Третий слайд - дополнительная информация по теме презентации -
+                            заголовок слайда, три изображения и три блока текста, размещенные на слайде по образцу на
+                            рисунке макета слайда 3.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
+                        </string>
+                    </property>
+                </widget>
+                <widget class="QLabel" name="label_2">
+                    <property name="geometry">
+                        <rect>
+                            <x>11</x>
+                            <y>280</y>
+                            <width>52</width>
+                            <height>17</height>
+                        </rect>
+                    </property>
+                    <property name="sizePolicy">
+                        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                            <horstretch>0</horstretch>
+                            <verstretch>0</verstretch>
+                        </sizepolicy>
+                    </property>
+                    <property name="font">
+                        <font>
+                            <family>12</family>
+                            <pointsize>-1</pointsize>
+                            <weight>50</weight>
+                            <italic>false</italic>
+                            <bold>false</bold>
+                        </font>
+                    </property>
+                    <property name="styleSheet">
+                        <string notr="true">font: 14px bold;
+                            color: #F5F5F5;
+                        </string>
+                    </property>
+                    <property name="text">
+                        <string>Оценка:</string>
+                    </property>
+                </widget>
+                <widget class="QLabel" name="total">
+                    <property name="geometry">
+                        <rect>
+                            <x>69</x>
+                            <y>280</y>
+                            <width>16</width>
+                            <height>17</height>
+                        </rect>
+                    </property>
+                    <property name="sizePolicy">
+                        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                            <horstretch>0</horstretch>
+                            <verstretch>0</verstretch>
+                        </sizepolicy>
+                    </property>
+                    <property name="font">
+                        <font>
+                            <family>12</family>
+                            <pointsize>-1</pointsize>
+                            <weight>50</weight>
+                            <italic>false</italic>
+                            <bold>false</bold>
+                        </font>
+                    </property>
+                    <property name="styleSheet">
+                        <string notr="true">font: 14px bold;
+                            color: #F5F5F5;
+                        </string>
+                    </property>
+                    <property name="text">
+                        <string/>
+                    </property>
+                </widget>
+                <widget class="QLabel" name="label_3">
+                    <property name="geometry">
+                        <rect>
+                            <x>10</x>
+                            <y>300</y>
+                            <width>271</width>
+                            <height>17</height>
+                        </rect>
+                    </property>
+                    <property name="sizePolicy">
+                        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                            <horstretch>0</horstretch>
+                            <verstretch>0</verstretch>
+                        </sizepolicy>
+                    </property>
+                    <property name="font">
+                        <font>
+                            <family>12</family>
+                            <pointsize>-1</pointsize>
+                            <weight>50</weight>
+                            <italic>false</italic>
+                            <bold>false</bold>
+                        </font>
+                    </property>
+                    <property name="styleSheet">
+                        <string notr="true">font: 14px bold;
+                            color: #b71c1c;
+                        </string>
+                    </property>
+                    <property name="text">
+                        <string>Перетащите файл в любое место окна.</string>
+                    </property>
+                </widget>
+            </widget>
+        </widget>
+    </widget>
+    <resources/>
+    <connections/>
+</ui>
