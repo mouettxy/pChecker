@@ -6,8 +6,8 @@
             <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>433</width>
-                <height>315</height>
+                <width>410</width>
+                <height>411</height>
             </rect>
         </property>
         <property name="windowTitle">
@@ -62,7 +62,7 @@
                         </string>
                     </property>
                     <property name="text">
-                        <string>Оценка выставляется на основе:</string>
+                        <string>Критерии оценивания</string>
                     </property>
                 </widget>
                 <widget class="QTextBrowser" name="textBrowser">
@@ -70,8 +70,8 @@
                         <rect>
                             <x>11</x>
                             <y>44</y>
-                            <width>411</width>
-                            <height>230</height>
+                            <width>251</width>
+                            <height>321</height>
                         </rect>
                     </property>
                     <property name="sizePolicy">
@@ -111,44 +111,44 @@
                             font-weight:400; font-style:normal;&quot;&gt;
                             &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px;
                             -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Segoe UI';
-                            font-size:8.25pt;&quot;&gt;1. Общие требования:&lt;/span&gt;&lt;/p&gt;
+                            font-size:8.25pt;&quot;&gt;1. Общие требования:&lt;/span&gt;&lt;span style=&quot;
+                            font-size:12px;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
                             &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px;
                             -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Segoe UI';
-                            font-size:8.25pt;&quot;&gt; ● Ровно три слайда без анимации.&lt;/span&gt;&lt;/p&gt;
+                            font-size:8.25pt;&quot;&gt; ● Ровно три слайда без анимации.&lt;/span&gt;&lt;span style=&quot;
+                            font-size:12px;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
                             &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px;
                             -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Segoe UI';
                             font-size:8.25pt;&quot;&gt; ● Параметры страницы (слайда): экран (16:9), ориентация
-                            альбомная.&lt;/span&gt;&lt;/p&gt;
-                            &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px;
-                            margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Segoe
-                            UI'; font-size:8.25pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+                            альбомная.&lt;/span&gt;&lt;span style=&quot; font-size:12px;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
                             &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px;
                             -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Segoe UI';
                             font-size:8.25pt;&quot;&gt;2. Содержание, структура, форматирование шрифта и размещение
-                            изображений на слайдах:&lt;/span&gt;&lt;/p&gt;
+                            изображений на слайдах:&lt;/span&gt;&lt;span style=&quot; font-size:12px;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
                             &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px;
                             -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Segoe UI';
                             font-size:8.25pt;&quot;&gt; ● Первый слайд - титульный слайд с названием презентации; в
                             подзаголовке титульного слайда в качестве информации об авторе презентации указывается
-                            идентификационный номер участника экзамена.&lt;/span&gt;&lt;/p&gt;
+                            идентификационный номер участника экзамена.&lt;/span&gt;&lt;span style=&quot;
+                            font-size:12px;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
                             &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px;
                             -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Segoe UI';
                             font-size:8.25pt;&quot;&gt; ● Второй слайд - основная информация в соответствие с заданием,
                             размещенная по образцу на рисунке макета слайда 2: заголовок слайда, два блока текста и два
-                            изображения;&lt;/span&gt;&lt;/p&gt;
+                            изображения;&lt;/span&gt;&lt;span style=&quot; font-size:12px;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
                             &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px;
                             -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Segoe UI';
                             font-size:8.25pt;&quot;&gt; ● Третий слайд - дополнительная информация по теме презентации -
                             заголовок слайда, три изображения и три блока текста, размещенные на слайде по образцу на
-                            рисунке макета слайда 3.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
+                            рисунке макета слайда 3.&lt;/span&gt;&lt;span style=&quot; font-size:12px;&quot;&gt; &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
                         </string>
                     </property>
                 </widget>
                 <widget class="QLabel" name="label_2">
                     <property name="geometry">
                         <rect>
-                            <x>11</x>
-                            <y>280</y>
+                            <x>10</x>
+                            <y>370</y>
                             <width>52</width>
                             <height>17</height>
                         </rect>
@@ -180,8 +180,8 @@
                 <widget class="QLabel" name="total">
                     <property name="geometry">
                         <rect>
-                            <x>69</x>
-                            <y>280</y>
+                            <x>70</x>
+                            <y>370</y>
                             <width>16</width>
                             <height>17</height>
                         </rect>
@@ -214,7 +214,7 @@
                     <property name="geometry">
                         <rect>
                             <x>10</x>
-                            <y>300</y>
+                            <y>390</y>
                             <width>271</width>
                             <height>17</height>
                         </rect>
@@ -241,6 +241,72 @@
                     </property>
                     <property name="text">
                         <string>Перетащите файл в любое место окна.</string>
+                    </property>
+                </widget>
+                <widget class="QLineEdit" name="project_theme">
+                    <property name="geometry">
+                        <rect>
+                            <x>280</x>
+                            <y>44</y>
+                            <width>121</width>
+                            <height>31</height>
+                        </rect>
+                    </property>
+                    <property name="statusTip">
+                        <string notr="true"/>
+                    </property>
+                    <property name="whatsThis">
+                        <string notr="true"/>
+                    </property>
+                    <property name="accessibleName">
+                        <string notr="true"/>
+                    </property>
+                    <property name="accessibleDescription">
+                        <string notr="true"/>
+                    </property>
+                    <property name="styleSheet">
+                        <string notr="true">color: #212121;
+                            font: 16px bold;
+                            border: 1px solid 424242;
+                            background-color: #BDBDBD;
+                            border-radius: 2px;
+                        </string>
+                    </property>
+                    <property name="inputMask">
+                        <string notr="true"/>
+                    </property>
+                    <property name="text">
+                        <string notr="true"/>
+                    </property>
+                    <property name="maxLength">
+                        <number>16</number>
+                    </property>
+                    <property name="frame">
+                        <bool>false</bool>
+                    </property>
+                    <property name="placeholderText">
+                        <string>Тема презентации</string>
+                    </property>
+                    <property name="clearButtonEnabled">
+                        <bool>true</bool>
+                    </property>
+                </widget>
+                <widget class="QLabel" name="label_4">
+                    <property name="geometry">
+                        <rect>
+                            <x>280</x>
+                            <y>20</y>
+                            <width>121</width>
+                            <height>16</height>
+                        </rect>
+                    </property>
+                    <property name="styleSheet">
+                        <string notr="true">font: 14px bold;
+                            color: #F5F5F5;
+                        </string>
+                    </property>
+                    <property name="text">
+                        <string>Тема презентации</string>
                     </property>
                 </widget>
             </widget>
