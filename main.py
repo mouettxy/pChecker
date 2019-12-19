@@ -94,7 +94,94 @@ class PCheckerUtils:
         return f"screens/screen{slides_nums[0]}.jpg", f"screens/screen{slides_nums[1]}.jpg"
 
 
-class PChecker(QMainWindow):
+class PChecker:
+    def __init__(self, presentation):
+        super().__init__()
+        self.presentation  = presentation
+        self.text_threshold = 10
+        self.placeholder = PP_PLACEHOLDER_TYPE
+        self.mso = MSO_SHAPE_TYPE
+        self.get_font_sizes = self.get_font_sizes()
+        self.get_typefaces = self.get_typefaces()
+
+    def get_slides(self):
+        return len(self.presentation.slides)
+
+    def is_text(self, shape):
+        if shape.has_text_frame:
+            if shape.is_placeholder and shape.placeholder_format.type == self.placeholder.BODY:
+                return True
+            if len(shape.text) > self.text_threshold:
+                return True
+        return False
+
+    def is_image(self, shape):
+        if shape.shape_type == self.mso.PICTURE:
+            return True
+        if shape.is_placeholder and shape.placeholder_format.type == self.placeholder.PICTURE:
+            return True
+        return False
+
+    def is_title(self, shape):
+        if shape.is_placeholder and (
+            shape.placeholder_format.type == self.placeholder.TITLE
+                or shape.placeholder_format.type == self.placeholder.SUBTITLE
+                or shape.placeholder_format.type == self.placeholder.VERTICAL_TITLE
+                or shape.placeholder_format.type == self.placeholder.CENTER_TITLE):
+            return True
+        return False
+
+    def _get_paragraph_runs_by_id(self, slide_id):
+        runs = []
+        for shape in self.presentation.slides.get(slide_id).shapes:
+            if self.is_text(shape):
+                for paragraph in shape.text_frame.paragraphs:
+                    for run in paragraph.runs:
+                        runs.append(run)
+        return runs
+
+    def _get_all_paragraph_runs(self):
+        runs = []
+        for slide in self.presentation.slides:
+            for shape in slide.shapes:
+                if self.is_text(shape):
+                    for paragraph in shape.text_frame.paragraphs:
+                        for run in paragraph.runs:
+                            runs.append(run)
+        return runs
+
+    def get_font_sizes(self):
+        font_sizes = {
+            1: [],
+            2: [],
+            3: [],
+        }
+        for slide in self.presentation.slides:
+            index = int(self.presentation.slides.index(slide) + 1)
+            if index > 3:
+                return font_sizes
+            for run in self._get_paragraph_runs_by_id(slide.slide_id):
+                try:
+                    font_sizes[index].append(run.font.size.pt)
+                except AttributeError:
+                    pass
+        return font_sizes
+
+    def get_typefaces(self):
+        typefaces = set()
+        for run in self._get_all_paragraph_runs():
+            try:
+                typefaces.add(run.font.name)
+            except AttributeError:
+                pass
+        return typefaces
+
+    '''Lets check it out *On background starts song AC/DC - Highway to Hell*'''
+
+
+
+
+class PCheckerWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.Utils = PCheckerUtils()
@@ -116,13 +203,13 @@ class PChecker(QMainWindow):
                 self.ui.image_holder.setPixmap(QPixmap(file))
                 self.ui.statusbar.append(f'Изображение по пути {file} установлено')
             elif file_extension == 'pptx':
+                Check              = PChecker(Presentation(file))
                 slide_size         = self.Utils.get_width_height(Presentation(file))
                 images_path_cords  = self.Utils.save_images(Presentation(file))
                 prs_cords_dim_text = self.Utils.get_cords_dim(Presentation(file))
                 screens            = self.Utils.create_screenshots(slide_size, images_path_cords, prs_cords_dim_text)
                 self.ui.slide2_image_label.setPixmap(QPixmap(screens[0]))
                 self.ui.slide3_image_label.setPixmap(QPixmap(screens[1]))
-
                 self.ui.statusbar.append(f'Разбор pptx файла по пути {file}')
             else:
                 self.ui.statusbar.append('Не поддерживаемое расширение файла.')
@@ -132,6 +219,6 @@ class PChecker(QMainWindow):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    ex = PChecker()
+    ex = PCheckerWindow()
     ex.show()
     sys.exit(app.exec_())
