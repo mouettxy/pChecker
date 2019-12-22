@@ -5,7 +5,9 @@ import base64
 import os
 import shutil
 import PIL
+import re
 
+from collections import Counter
 from PIL import Image
 from PyQt5.Qt import QMainWindow, QApplication, QFileInfo, QPixmap
 from pptx import Presentation
@@ -192,8 +194,21 @@ class PChecker:
                     text.append(shape.text)
         return text
 
+    @staticmethod
+    def string_optimize(string):
+        """
+        Method reproduce given string and deletes all words that length <= 3 and all punctuation symbols
+        """
+        delete_junk_symbols = re.compile('[^a-zA-Zа-яА-ЯёЁ ]')
+        delete_junk_words = re.compile('\\b\\w{0,3}\\b')
+        return delete_junk_words.sub("", delete_junk_symbols.sub("", string.lower()))
+
     def analyze_text(self):
-        pass
+        text_analyzed = []
+        for text in self.get_text():
+            text_analyzed.extend(self.string_optimize(text).split())
+        most_common = Counter(text_analyzed).most_common(5)
+        return most_common
 
     '''Lets check it out *On background starts song AC/DC - Highway to Hell*'''
 
@@ -229,18 +244,23 @@ class PChecker:
                     slides[index]['pictureCounter'] += 1
         return slides
 
-    def analyze_results(self, **kwargs):
+    def analyze_results(self,
+                        txt_img_collisions_btn=False,
+                        distorted_images_btn=False,
+                        all_collisions_btn=False,
+                        content_compliance=False
+                        ):
         analyze_params = {
             'slides_count':               self.get_slides(),
             'text_blocks_exist':          None,
             'title_on_cover_page':        None,
             'title_on_other_slides':      None,
-            'content_compliance':         None,
+            'content_compliance':         content_compliance,
             'single_typeface':            None,
             'right_font_size':            None,
-            'text_not_overlaps_images':   None,
-            'images_not_distorted':       None,
-            'images_not_overlaps_shapes': None,
+            'text_not_overlaps_images':   txt_img_collisions_btn,
+            'images_not_distorted':       distorted_images_btn,
+            'images_not_overlaps_shapes': all_collisions_btn,
         }
         slides_contents = self.get_slides_contents()
         font_sizes      = self.get_font_sizes()
@@ -307,6 +327,26 @@ class PChecker:
             analyze_params['single_typeface'] = False
         return analyze_params
 
+    @staticmethod
+    def translate_results(results):
+        results['Количество слайдов']                   = results.pop('slides_count')
+        results['Блоки текста и изображений размещены'] = results.pop('text_blocks_exist')
+        results['Название на титульном']                = results.pop('title_on_cover_page')
+        results['Название на 2м и 3м слайде']           = results.pop('title_on_other_slides')
+        results['Соответствие теме']                    = results.pop('content_compliance')
+        results['Единый шрифт']                         = results.pop('single_typeface')
+        results['Правильный размер шрифта']             = results.pop('right_font_size')
+        results['Текст не перекрывает изображения']     = results.pop('text_not_overlaps_images')
+        results['Изображения не искажены']              = results.pop('images_not_distorted')
+        results['Изображения не перекрывают элементы']  = results.pop('images_not_overlaps_shapes')
+        return results
+
+    def unloading_xlsx(self):
+        pass
+
+    def unloading_txt(self):
+        pass
+
 
 class PCheckerWindow(QMainWindow):
     def __init__(self):
@@ -314,6 +354,7 @@ class PCheckerWindow(QMainWindow):
         self.Utils = PCheckerUtils()
         self.ui = form.Ui_MainWindow()
         self.ui.setupUi(self)
+        self.ui.get_answer.clicked.connect(self.checkAndReturnResult)
         self.setAcceptDrops(True)
 
     def dragEnterEvent(self, event):
@@ -323,25 +364,49 @@ class PCheckerWindow(QMainWindow):
             event.ignore()
 
     def dropEvent(self, event):  # Ловим ивент дропа файла в окно
-        file = event.mimeData().urls()[0].toLocalFile()
-        file_extension = QFileInfo(file).suffix()
+        self.file = event.mimeData().urls()[0].toLocalFile()
+        file_extension = QFileInfo(self.file).suffix()
         try:
             if file_extension == 'jpg' or file_extension == 'jpeg' or file_extension == 'png':
-                self.ui.image_holder.setPixmap(QPixmap(file))
-                self.ui.statusbar.append(f'Изображение по пути {file} установлено')
+                self.ui.image_holder.setPixmap(QPixmap(self.file))
+                self.ui.statusbar.append(f'Изображение по пути {self.file} установлено')
             elif file_extension == 'pptx':
-                Check              = PChecker(Presentation(file))
-                slide_size         = self.Utils.get_width_height(Presentation(file))
-                images_path_cords  = self.Utils.save_images(Presentation(file))
-                prs_cords_dim_text = self.Utils.get_cords_dim(Presentation(file))
+                Check = PChecker(Presentation(self.file))
+                slide_size         = self.Utils.get_width_height(Presentation(self.file))
+                images_path_cords  = self.Utils.save_images(Presentation(self.file))
+                prs_cords_dim_text = self.Utils.get_cords_dim(Presentation(self.file))
                 screens            = self.Utils.create_screenshots(slide_size, images_path_cords, prs_cords_dim_text)
+                content_compliance = Check.analyze_text()
+                content_compliance = [words for words in content_compliance]
                 self.ui.slide2_image_label.setPixmap(QPixmap(screens[0]))
                 self.ui.slide3_image_label.setPixmap(QPixmap(screens[1]))
-                self.ui.statusbar.append(f'Разбор pptx файла по пути {file}')
+                self.ui.statusbar.append(f'Разбор pptx файла по пути {self.file}')
+                self.ui.statusbar.append(f'Наиболее часто встречающиеся слова в презентации:')
+                for tuple_content in content_compliance:
+                    self.ui.statusbar.append(f'{tuple_content[0]} => {tuple_content[1]}')
             else:
                 self.ui.statusbar.append('Не поддерживаемое расширение файла.')
         except Exception as e:
             self.ui.statusbar.append(f'Ошибка {e} при загрузке файла.')
+
+    def checkAndReturnResult(self):
+        Check = PChecker(Presentation(self.file))
+        img_coll_btn = self.ui.txt_img_collisions_btn_yes.isChecked()
+        dist_images = self.ui.distorted_images_btn_yes.isChecked()
+        all_coll = self.ui.all_collisions_btn_yes.isChecked()
+        cont_compliance = self.ui.content_compliance_btn_yes.isChecked()
+        unloading_txt = self.ui.unloading_btn1.isChecked()
+        unloading_xlsx = self.ui.unloading_btn2.isChecked()
+        unloading_statusbar = self.ui.unloading_btn3.isChecked()
+        results = Check.analyze_results(img_coll_btn, dist_images, all_coll, cont_compliance)
+        translated_result = Check.translate_results(results)
+        if unloading_statusbar:
+            for result in translated_result:
+                self.ui.statusbar.append(f'{result} === {translated_result[result]}')
+        elif unloading_txt:
+            Check.unloading_txt()
+        else:
+            Check.unloading_xlsx()
 
 
 if __name__ == "__main__":
