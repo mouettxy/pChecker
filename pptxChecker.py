@@ -9,11 +9,9 @@ from pptx.enum.shapes import MSO_SHAPE_TYPE, PP_PLACEHOLDER_TYPE
 from pptx.enum.text import MSO_AUTO_SIZE
 
 
-class PCheckerUtils:
+class PresentationCustomUtils:
     def __init__(self):
         super().__init__()
-        self.mso_pic = MSO_SHAPE_TYPE.PICTURE
-        self.placeholder_pic = PP_PLACEHOLDER_TYPE.PICTURE
 
     @staticmethod
     def emu_px(emu):
@@ -24,7 +22,7 @@ class PCheckerUtils:
         try:
             os.mkdir('screens')
         except OSError:
-            rmtree('screens')
+            rmtree('screens', ignore_errors=True)
             os.mkdir('screens')
         slides_pic = {'2': [path for path in image_path_cords if 'slide2' in path[0]],
                       '3': [path for path in image_path_cords if 'slide3' in path[0]]}
@@ -79,8 +77,8 @@ class PCheckerUtils:
             slide_counter += 1
             picture_counter = 1
             for shape in slide.shapes:
-                if shape.shape_type == self.mso_pic or (shape.is_placeholder and shape.placeholder_format.type ==
-                                                                                 self.placeholder_pic):
+                if shape.shape_type == MSO_SHAPE_TYPE.PICTURE or (shape.is_placeholder and
+                                                                  shape.placeholder_format.type == PP_PLACEHOLDER_TYPE.PICTURE):
                     if slide_counter > 3:
                         raise Exception('Количество слайдов более чем 3, остановка парсинга картинок')
                     pil_pic_path = f"img/img_slide{slide_counter}_{picture_counter}.png"
@@ -95,7 +93,6 @@ class PCheckerUtils:
                     if 1 < slide_counter < 4:
                         image_cords.append((self.emu_px(shape.left), self.emu_px(shape.top)))
                         image_paths.append(pil_pic_path)
-
                 else:
                     pass
         return [[image_paths[i], image_cords[i]] for i in range(len(image_cords))]
@@ -114,15 +111,11 @@ class PCheckerUtils:
         return cords_dim
 
 
-class PChecker:
+class PresentationUtils(PresentationCustomUtils):
     def __init__(self, presentation):
         super().__init__()
-        self.Utils = PCheckerUtils()
         self.presentation  = presentation
         self.text_threshold = 2
-        self.placeholder = PP_PLACEHOLDER_TYPE
-        self.mso = MSO_SHAPE_TYPE
-        self.warnings = []
 
     def get_slides_len(self):
         return len(self.presentation.slides)
@@ -131,25 +124,25 @@ class PChecker:
         if shape.has_text_frame:
             if self.is_title(shape):
                 return True
-            if shape.is_placeholder and shape.placeholder_format.type == self.placeholder.BODY:
+            if shape.is_placeholder and shape.placeholder_format.type == PP_PLACEHOLDER_TYPE.BODY:
                 return True
             if len(shape.text) > self.text_threshold:
                 return True
         return False
 
     def is_image(self, shape):
-        if shape.shape_type == self.mso.PICTURE:
+        if shape.shape_type == MSO_SHAPE_TYPE.PICTURE:
             return True
-        if shape.is_placeholder and shape.placeholder_format.type == self.placeholder.PICTURE:
+        if shape.is_placeholder and shape.placeholder_format.type == PP_PLACEHOLDER_TYPE.PICTURE:
             return True
         return False
 
     def is_title(self, shape):
         if shape.is_placeholder and (
-            shape.placeholder_format.type == self.placeholder.TITLE
-                or shape.placeholder_format.type == self.placeholder.SUBTITLE
-                or shape.placeholder_format.type == self.placeholder.VERTICAL_TITLE
-                or shape.placeholder_format.type == self.placeholder.CENTER_TITLE):
+            shape.placeholder_format.type == PP_PLACEHOLDER_TYPE.TITLE
+                or shape.placeholder_format.type == PP_PLACEHOLDER_TYPE.SUBTITLE
+                or shape.placeholder_format.type == PP_PLACEHOLDER_TYPE.VERTICAL_TITLE
+                or shape.placeholder_format.type == PP_PLACEHOLDER_TYPE.CENTER_TITLE):
             return True
         return False
 
@@ -182,8 +175,7 @@ class PChecker:
         return runs
 
     def get_font_sizes(self):
-        font_sizes = {
-        }
+        font_sizes = {}
         for slide in self.presentation.slides:
             index = int(self.presentation.slides.index(slide) + 1)
             if index > 3:
@@ -211,127 +203,6 @@ class PChecker:
     def analyze_text(self):
         text_analyzed = []
         for text in self.get_text():
-            text_analyzed.extend(self.Utils.string_optimize(text).split())
+            text_analyzed.extend(self.string_optimize(text).split())
         most_common = Counter(text_analyzed).most_common(5)
         return most_common
-
-    def get_slides_contents(self):
-        slides = {
-            1: {
-                'textCounter': 0,
-                'pictureCounter': 0,
-                'titleCounter': 0,
-            },
-            2: {
-                'textCounter': 0,
-                'pictureCounter': 0,
-                'titleCounter': 0,
-            },
-            3: {
-                'textCounter': 0,
-                'pictureCounter': 0,
-                'titleCounter': 0,
-            }
-        }
-        for slide in self.presentation.slides:
-            index = int(self.presentation.slides.index(slide) + 1)
-            if index > 3:
-                return slides
-            for shape in slide.shapes:
-                if self.is_text(shape):
-                    if self.is_title(shape):
-                        slides[index]['titleCounter'] += 1
-                    else:
-                        slides[index]['textCounter'] += 1
-                if self.is_image(shape):
-                    slides[index]['pictureCounter'] += 1
-        return slides
-
-    def analyze_results(self,
-                        txt_img_collisions_btn=False,
-                        distorted_images_btn=False,
-                        all_collisions_btn=False,
-                        content_compliance=False
-                        ):
-        analyze_params = {
-            'slides_count': self.get_slides_len(),
-            'text_blocks_exist':          None,
-            'title_on_cover_page':        None,
-            'title_on_other_slides':      None,
-            'content_compliance':         content_compliance,
-            'single_typeface':            None,
-            'right_font_size':            None,
-            'text_not_overlaps_images':   txt_img_collisions_btn,
-            'images_not_distorted':       distorted_images_btn,
-            'images_not_overlaps_shapes': all_collisions_btn,
-        }
-        slides_contents = self.get_slides_contents()
-        font_sizes      = self.get_font_sizes()
-        typefaces       = self.get_typefaces()
-        # Check first slide #
-        slide1_font_size = 0
-        slide1_blocks_correct = 0
-        if max(font_sizes[1]) == 40 and min(font_sizes[1]) == 24:
-            slide1_font_size = 1
-        if slides_contents[1]['titleCounter'] + slides_contents[1]['textCounter'] == 2:
-            slide1_blocks_correct = 1
-        if slides_contents[1]['titleCounter'] >= 1 or \
-                (slides_contents[1]['textCounter'] >= 1 and not slides_contents[1]['titleCounter']):
-            analyze_params['title_on_cover_page'] = True
-        # End first slide #
-
-        # Check second slide #
-        slide2_font_size = 0
-        slide2_blocks_correct = 0
-        slide2_title = 0
-        if max(font_sizes[2]) == 24 and min(font_sizes[2]) == 20:
-            slide2_font_size = 1
-        if slides_contents[2]['textCounter'] + slides_contents[2]['titleCounter'] == 3 and \
-           slides_contents[2]['pictureCounter'] == 2:
-            slide2_blocks_correct = 1
-            slide2_title = 1
-        if slides_contents[2]['textCounter'] + slides_contents[2]['titleCounter'] == 2 and \
-           slides_contents[2]['pictureCounter'] == 2:
-            slide2_blocks_correct = 1
-        # End second slide #
-
-        # Check third slide #
-        slide3_font_size = 0
-        slide3_blocks_correct = 0
-        slide3_title = 0
-        if max(font_sizes[3]) == 24 and min(font_sizes[3]) == 20:
-            slide3_font_size = 1
-        if slides_contents[3]['textCounter'] + slides_contents[3]['titleCounter'] == 3 and \
-           slides_contents[3]['pictureCounter'] == 3:
-            slide3_blocks_correct = 1
-        if slides_contents[3]['textCounter'] + slides_contents[3]['titleCounter'] == 4 and \
-           slides_contents[3]['pictureCounter'] == 3:
-            slide3_blocks_correct = 1
-            slide3_title = 1
-        if slides_contents[3]['titleCounter'] == 1:
-            slide3_title = 1
-        # End third slide #
-
-        if (slide1_blocks_correct + slide2_blocks_correct + slide3_blocks_correct) == 3:
-            analyze_params['text_blocks_exist'] = True
-        else:
-            analyze_params['text_blocks_exist'] = False
-        if (slide2_title + slide3_title) == 2:
-            analyze_params['title_on_other_slides'] = True
-        else:
-            analyze_params['title_on_other_slides'] = False
-        if (slide1_font_size + slide2_font_size + slide3_font_size) == 3:
-            analyze_params['right_font_size'] = True
-        else:
-            analyze_params['right_font_size'] = False
-        if not len(typefaces) > 1:
-            analyze_params['single_typeface'] = True
-        else:
-            analyze_params['single_typeface'] = False
-        return analyze_params
-
-    def unloading_xlsx(self):
-        pass
-
-    def unloading_txt(self):
-        pass
