@@ -7,8 +7,26 @@
     <x>0</x>
     <y>0</y>
     <width>1020</width>
-    <height>681</height>
+    <height>675</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>1020</width>
+    <height>675</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>1020</width>
+    <height>675</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>Проверка задания ОГЭ</string>
@@ -38,7 +56,7 @@
     <property name="font">
      <font>
       <family>Arial</family>
-      <pointsize>9</pointsize>
+      <pointsize>8</pointsize>
       <weight>50</weight>
       <bold>false</bold>
      </font>
@@ -116,7 +134,7 @@ p, li { white-space: pre-wrap; }
       <property name="font">
        <font>
         <family>Arial</family>
-        <pointsize>9</pointsize>
+        <pointsize>8</pointsize>
         <weight>50</weight>
         <bold>false</bold>
        </font>
@@ -132,7 +150,7 @@ border-radius: 2px;
        <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Arial'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Arial'; font-size:8pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Segoe UI'; font-size:10pt;&quot;&gt;Загружать файлы можно только по одному. Автоматически проверяются все критерии кроме коллизий. Для проверки коллизий реализован вывод презентаций в виде картинок, строка состояния внизу выводит ответ или ошибки. Конечный файл можно выгрузить в файл формата .xlsx. &lt;/span&gt;&lt;span style=&quot; font-family:'Segoe UI'; font-size:10pt; font-weight:600;&quot;&gt;Файл можно перетащить в любое место окна&lt;/span&gt;&lt;span style=&quot; font-family:'Segoe UI'; font-size:10pt;&quot;&gt;.   &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
      </widget>
@@ -259,6 +277,8 @@ p, li { white-space: pre-wrap; }
       </property>
       <property name="font">
        <font>
+        <family>Arial</family>
+        <pointsize>8</pointsize>
         <weight>75</weight>
         <bold>true</bold>
        </font>
@@ -270,7 +290,6 @@ padding-right: 4px;
 color: #fafafa;
 background-color: #424242;
 border-radius: 2px;
-font-weight: bold;
                             </string>
       </property>
       <property name="placeholderText">
@@ -288,6 +307,8 @@ font-weight: bold;
       </property>
       <property name="font">
        <font>
+        <family>Arial</family>
+        <pointsize>8</pointsize>
         <weight>75</weight>
         <bold>true</bold>
        </font>
@@ -367,7 +388,7 @@ color: #FAFAFA;
        <property name="font">
         <font>
          <family>Arial</family>
-         <pointsize>9</pointsize>
+         <pointsize>8</pointsize>
          <weight>50</weight>
          <bold>false</bold>
         </font>
@@ -400,7 +421,7 @@ border-radius: 2px;</string>
            <string notr="true">color: #FAFAFA;
 border: none;
 background: #616161;
-font-size: 11px;
+font-size: 10px;
 padding: 5px;</string>
           </property>
           <property name="text">
@@ -425,7 +446,7 @@ padding: 5px;</string>
            <string notr="true">color: #FAFAFA;
 border: none;
 background: #616161;
-font-size: 11px;
+font-size: 10px;
 padding: 5px;</string>
           </property>
           <property name="text">
@@ -499,7 +520,7 @@ padding: 5px;</string>
        <property name="font">
         <font>
          <family>Arial</family>
-         <pointsize>9</pointsize>
+         <pointsize>8</pointsize>
          <weight>50</weight>
          <bold>false</bold>
         </font>
@@ -532,7 +553,7 @@ border-radius: 2px;</string>
            <string notr="true">color: #FAFAFA;
 border: none;
 background: #616161;
-font-size: 11px;
+font-size: 10px;
 padding: 5px;</string>
           </property>
           <property name="text">
@@ -560,7 +581,7 @@ padding: 5px;</string>
            <string notr="true">color: #FAFAFA;
 border: none;
 background: #616161;
-font-size: 11px;
+font-size: 10px;
 padding: 5px;</string>
           </property>
           <property name="text">
@@ -631,7 +652,7 @@ padding: 5px;</string>
        <property name="font">
         <font>
          <family>Arial</family>
-         <pointsize>9</pointsize>
+         <pointsize>8</pointsize>
          <weight>50</weight>
          <bold>false</bold>
         </font>
@@ -676,7 +697,7 @@ border-radius: 2px;</string>
            <string notr="true">color: #FAFAFA;
 border: none;
 background: #616161;
-font-size: 11px;
+font-size: 10px;
 padding: 5px;</string>
           </property>
           <property name="text">
@@ -716,7 +737,7 @@ padding: 5px;</string>
            <string notr="true">color: #FAFAFA;
 border: none;
 background: #616161;
-font-size: 11px;
+font-size: 10px;
 padding: 5px;</string>
           </property>
           <property name="text">
@@ -787,7 +808,7 @@ padding: 5px;</string>
        <property name="font">
         <font>
          <family>Arial</family>
-         <pointsize>9</pointsize>
+         <pointsize>8</pointsize>
          <weight>50</weight>
          <bold>false</bold>
         </font>
@@ -832,7 +853,7 @@ border-radius: 2px;</string>
            <string notr="true">color: #FAFAFA;
 border: none;
 background: #616161;
-font-size: 11px;
+font-size: 10px;
 padding: 5px;</string>
           </property>
           <property name="text">
@@ -872,7 +893,7 @@ padding: 5px;</string>
            <string notr="true">color: #FAFAFA;
 border: none;
 background: #616161;
-font-size: 11px;
+font-size: 10px;
 padding: 5px;</string>
           </property>
           <property name="text">
@@ -971,7 +992,7 @@ color: #FAFAFA;
        <property name="font">
         <font>
          <family>Arial</family>
-         <pointsize>9</pointsize>
+         <pointsize>8</pointsize>
          <weight>50</weight>
          <bold>false</bold>
         </font>
@@ -1041,6 +1062,9 @@ margin-bottom: 10px;
          </property>
          <property name="text">
           <string>В статусбар</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
          </property>
         </widget>
        </item>
@@ -1132,7 +1156,7 @@ vertical-align: center;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Arial'; font-size:11pt; font-weight:600; font-style:normal;&quot;&gt;
-&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:24pt; font-weight:400;&quot;&gt;Множественная проверка находится на стадии выполнения. Вполне возможно что дальше планов эта страница не уйдёт, но мы можем надеяться на то что это всё таки случится!&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:24pt;&quot;&gt;Множественная проверка находится на стадии выполнения. Вполне возможно что дальше планов эта страница не уйдёт, но мы можем надеяться на то что это всё таки случится!&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
       <property name="placeholderText">
        <string/>
