@@ -1,0 +1,1 @@
+TEXT_THRESHOLD = 1
