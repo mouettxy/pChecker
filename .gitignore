@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /ui_to_py.bash
 /form.ui
 /log.txt
@@ -7,3 +8,9 @@
 /localPython
 /.git
 /.idea
+=======
+/convert_ui_to_py.bat
+/form.ui
+/.idea
+/log.txt
+>>>>>>> Привязка к обновлённому API, большая часть методов задокументирована.
