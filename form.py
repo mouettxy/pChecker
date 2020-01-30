@@ -13,7 +13,17 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(1020, 672)
+        MainWindow.resize(1020, 675)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(MainWindow.sizePolicy().hasHeightForWidth())
+        MainWindow.setSizePolicy(sizePolicy)
+        MainWindow.setMinimumSize(QtCore.QSize(1020, 675))
+        MainWindow.setMaximumSize(QtCore.QSize(1020, 675))
+        font = QtGui.QFont()
+        font.setFamily("Arial")
+        MainWindow.setFont(font)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setStyleSheet("QVBoxLayout {\n"
 "                    border: none;\n"
@@ -28,29 +38,42 @@ class Ui_MainWindow(object):
         sizePolicy.setHeightForWidth(self.main_tab_widget.sizePolicy().hasHeightForWidth())
         self.main_tab_widget.setSizePolicy(sizePolicy)
         font = QtGui.QFont()
-        font.setFamily("Segoe UI")
+        font.setFamily("Arial")
+        font.setPointSize(9)
+        font.setBold(False)
+        font.setWeight(50)
         self.main_tab_widget.setFont(font)
         self.main_tab_widget.setStyleSheet("border: none;")
         self.main_tab_widget.setTabBarAutoHide(True)
         self.main_tab_widget.setObjectName("main_tab_widget")
-        self.single_file_check = QtWidgets.QWidget()
-        self.single_file_check.setStyleSheet("background-color: #212121;")
-        self.single_file_check.setObjectName("single_file_check")
-        self.input_data = QtWidgets.QTextEdit(self.single_file_check)
-        self.input_data.setGeometry(QtCore.QRect(10, 10, 671, 81))
+        self.about_program = QtWidgets.QWidget()
+        self.about_program.setStyleSheet("border: none;\n"
+"background: #212121;")
+        self.about_program.setObjectName("about_program")
+        self.input_data_2 = QtWidgets.QTextEdit(self.about_program)
+        self.input_data_2.setGeometry(QtCore.QRect(150, 170, 741, 301))
         font = QtGui.QFont()
-        font.setFamily("Segoe UI")
-        font.setPointSize(-1)
-        self.input_data.setFont(font)
-        self.input_data.setStyleSheet("color: #FAFAFA;\n"
-"font-size: 10px;\n"
+        font.setFamily("Arial")
+        font.setPointSize(10)
+        self.input_data_2.setFont(font)
+        self.input_data_2.setStyleSheet("color: #FAFAFA;\n"
 "background-color: #424242;\n"
 "border: none;\n"
 "border-radius: 2px;\n"
 "                            ")
-        self.input_data.setObjectName("input_data")
+        self.input_data_2.setObjectName("input_data_2")
+        self.main_tab_widget.addTab(self.about_program, "")
+        self.single_file_check = QtWidgets.QWidget()
+        self.single_file_check.setStyleSheet("background-color: #212121;")
+        self.single_file_check.setObjectName("single_file_check")
         self.slides_box = QtWidgets.QToolBox(self.single_file_check)
-        self.slides_box.setGeometry(QtCore.QRect(10, 100, 671, 451))
+        self.slides_box.setGeometry(QtCore.QRect(10, 10, 670, 450))
+        font = QtGui.QFont()
+        font.setFamily("Arial")
+        font.setPointSize(-1)
+        font.setBold(True)
+        font.setWeight(75)
+        self.slides_box.setFont(font)
         self.slides_box.setStyleSheet("border: 1px solid #FAFAFA;\n"
 "                                color: #FAFAFA;\n"
 "                                font-size: 12px;\n"
@@ -60,7 +83,7 @@ class Ui_MainWindow(object):
 "                            ")
         self.slides_box.setObjectName("slides_box")
         self.slide1_page = QtWidgets.QWidget()
-        self.slide1_page.setGeometry(QtCore.QRect(0, 0, 651, 375))
+        self.slide1_page.setGeometry(QtCore.QRect(0, 0, 90, 20))
         self.slide1_page.setStyleSheet("border: none;")
         self.slide1_page.setObjectName("slide1_page")
         self.slide2_image_label = QtWidgets.QLabel(self.slide1_page)
@@ -71,11 +94,17 @@ class Ui_MainWindow(object):
         self.slide2_image_label.setObjectName("slide2_image_label")
         self.slides_box.addItem(self.slide1_page, "")
         self.slide2_page = QtWidgets.QWidget()
-        self.slide2_page.setGeometry(QtCore.QRect(0, 0, 651, 375))
+        self.slide2_page.setGeometry(QtCore.QRect(0, 0, 650, 372))
         self.slide2_page.setStyleSheet("border: none;")
         self.slide2_page.setObjectName("slide2_page")
         self.slide3_image_label = QtWidgets.QLabel(self.slide2_page)
         self.slide3_image_label.setGeometry(QtCore.QRect(0, 0, 651, 381))
+        font = QtGui.QFont()
+        font.setFamily("Arial")
+        font.setPointSize(-1)
+        font.setBold(True)
+        font.setWeight(75)
+        self.slide3_image_label.setFont(font)
         self.slide3_image_label.setText("")
         self.slide3_image_label.setTextFormat(QtCore.Qt.PlainText)
         self.slide3_image_label.setScaledContents(True)
@@ -83,21 +112,26 @@ class Ui_MainWindow(object):
         self.slide3_image_label.setObjectName("slide3_image_label")
         self.slides_box.addItem(self.slide2_page, "")
         self.statusbar = QtWidgets.QTextEdit(self.single_file_check)
-        self.statusbar.setGeometry(QtCore.QRect(10, 560, 671, 81))
+        self.statusbar.setGeometry(QtCore.QRect(10, 470, 671, 171))
+        font = QtGui.QFont()
+        font.setFamily("Arial")
+        font.setPointSize(9)
+        font.setBold(True)
+        font.setWeight(75)
+        self.statusbar.setFont(font)
         self.statusbar.setStyleSheet("border: none;\n"
 "padding-left: 4px;\n"
 "padding-right: 4px;\n"
 "color: #fafafa;\n"
 "background-color: #424242;\n"
 "border-radius: 2px;\n"
-"font-weight: bold;\n"
 "                            ")
         self.statusbar.setObjectName("statusbar")
         self.get_answer = QtWidgets.QPushButton(self.single_file_check)
         self.get_answer.setGeometry(QtCore.QRect(690, 610, 321, 31))
         font = QtGui.QFont()
-        font.setFamily("Segoe UI")
-        font.setPointSize(-1)
+        font.setFamily("Arial")
+        font.setPointSize(9)
         font.setBold(True)
         font.setWeight(75)
         self.get_answer.setFont(font)
@@ -107,7 +141,6 @@ class Ui_MainWindow(object):
 "    background-color: #424242;\n"
 "    border: none;\n"
 "    color: #FAFAFA;\n"
-"    font-size: 12px;\n"
 "    font-weight: bold;\n"
 "}\n"
 "QPushButton:hover {\n"
@@ -121,6 +154,10 @@ class Ui_MainWindow(object):
         self.get_answer.setObjectName("get_answer")
         self.groupBox = QtWidgets.QGroupBox(self.single_file_check)
         self.groupBox.setGeometry(QtCore.QRect(690, 240, 321, 311))
+        font = QtGui.QFont()
+        font.setFamily("Arial")
+        font.setPointSize(-1)
+        self.groupBox.setFont(font)
         self.groupBox.setStyleSheet("QGroupBox {\n"
 "border-color: #FAFAFA;\n"
 "background-color:#616161;\n"
@@ -143,6 +180,12 @@ class Ui_MainWindow(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.content_compliace_frame.sizePolicy().hasHeightForWidth())
         self.content_compliace_frame.setSizePolicy(sizePolicy)
+        font = QtGui.QFont()
+        font.setFamily("Arial")
+        font.setPointSize(9)
+        font.setBold(False)
+        font.setWeight(50)
+        self.content_compliace_frame.setFont(font)
         self.content_compliace_frame.setStyleSheet("background: #757575;\n"
 "border-radius: 2px;")
         self.content_compliace_frame.setFrameShape(QtWidgets.QFrame.StyledPanel)
@@ -156,10 +199,14 @@ class Ui_MainWindow(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.content_compliance_btn_yes.sizePolicy().hasHeightForWidth())
         self.content_compliance_btn_yes.setSizePolicy(sizePolicy)
+        font = QtGui.QFont()
+        font.setFamily("Arial")
+        font.setPointSize(-1)
+        self.content_compliance_btn_yes.setFont(font)
         self.content_compliance_btn_yes.setStyleSheet("color: #FAFAFA;\n"
 "border: none;\n"
 "background: #616161;\n"
-"font-size: 11px;\n"
+"font-size: 10px;\n"
 "padding: 5px;")
         self.content_compliance_btn_yes.setObjectName("content_compliance_btn_yes")
         self.gridLayout_4.addWidget(self.content_compliance_btn_yes, 0, 1, 1, 1)
@@ -169,10 +216,14 @@ class Ui_MainWindow(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.content_compliance_btn_no.sizePolicy().hasHeightForWidth())
         self.content_compliance_btn_no.setSizePolicy(sizePolicy)
+        font = QtGui.QFont()
+        font.setFamily("Arial")
+        font.setPointSize(-1)
+        self.content_compliance_btn_no.setFont(font)
         self.content_compliance_btn_no.setStyleSheet("color: #FAFAFA;\n"
 "border: none;\n"
 "background: #616161;\n"
-"font-size: 11px;\n"
+"font-size: 10px;\n"
 "padding: 5px;")
         self.content_compliance_btn_no.setChecked(True)
         self.content_compliance_btn_no.setObjectName("content_compliance_btn_no")
@@ -186,7 +237,7 @@ class Ui_MainWindow(object):
         self.content_compliance_label.setMinimumSize(QtCore.QSize(200, 0))
         self.content_compliance_label.setMaximumSize(QtCore.QSize(200, 16777215))
         font = QtGui.QFont()
-        font.setFamily("Segoe UI")
+        font.setFamily("Arial")
         font.setPointSize(-1)
         font.setBold(False)
         font.setWeight(50)
@@ -207,6 +258,12 @@ class Ui_MainWindow(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.txt_images_collisions_frame.sizePolicy().hasHeightForWidth())
         self.txt_images_collisions_frame.setSizePolicy(sizePolicy)
+        font = QtGui.QFont()
+        font.setFamily("Arial")
+        font.setPointSize(9)
+        font.setBold(False)
+        font.setWeight(50)
+        self.txt_images_collisions_frame.setFont(font)
         self.txt_images_collisions_frame.setStyleSheet("background: #757575;\n"
 "border-radius: 2px;")
         self.txt_images_collisions_frame.setFrameShape(QtWidgets.QFrame.StyledPanel)
@@ -220,10 +277,14 @@ class Ui_MainWindow(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.txt_img_collisions_btn_no.sizePolicy().hasHeightForWidth())
         self.txt_img_collisions_btn_no.setSizePolicy(sizePolicy)
+        font = QtGui.QFont()
+        font.setFamily("Arial")
+        font.setPointSize(-1)
+        self.txt_img_collisions_btn_no.setFont(font)
         self.txt_img_collisions_btn_no.setStyleSheet("color: #FAFAFA;\n"
 "border: none;\n"
 "background: #616161;\n"
-"font-size: 11px;\n"
+"font-size: 10px;\n"
 "padding: 5px;")
         self.txt_img_collisions_btn_no.setChecked(True)
         self.txt_img_collisions_btn_no.setObjectName("txt_img_collisions_btn_no")
@@ -234,10 +295,14 @@ class Ui_MainWindow(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.txt_img_collisions_btn_yes.sizePolicy().hasHeightForWidth())
         self.txt_img_collisions_btn_yes.setSizePolicy(sizePolicy)
+        font = QtGui.QFont()
+        font.setFamily("Arial")
+        font.setPointSize(-1)
+        self.txt_img_collisions_btn_yes.setFont(font)
         self.txt_img_collisions_btn_yes.setStyleSheet("color: #FAFAFA;\n"
 "border: none;\n"
 "background: #616161;\n"
-"font-size: 11px;\n"
+"font-size: 10px;\n"
 "padding: 5px;")
         self.txt_img_collisions_btn_yes.setObjectName("txt_img_collisions_btn_yes")
         self.gridLayout_3.addWidget(self.txt_img_collisions_btn_yes, 0, 2, 1, 1)
@@ -250,7 +315,7 @@ class Ui_MainWindow(object):
         self.txt_img_collisions_label.setMinimumSize(QtCore.QSize(200, 0))
         self.txt_img_collisions_label.setMaximumSize(QtCore.QSize(200, 16777215))
         font = QtGui.QFont()
-        font.setFamily("Segoe UI")
+        font.setFamily("Arial")
         font.setPointSize(-1)
         font.setBold(False)
         font.setWeight(50)
@@ -272,7 +337,7 @@ class Ui_MainWindow(object):
         sizePolicy.setHeightForWidth(self.distorted_images_frame.sizePolicy().hasHeightForWidth())
         self.distorted_images_frame.setSizePolicy(sizePolicy)
         font = QtGui.QFont()
-        font.setFamily("Segoe UI")
+        font.setFamily("Arial")
         font.setPointSize(9)
         font.setBold(False)
         font.setWeight(50)
@@ -290,12 +355,16 @@ class Ui_MainWindow(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.distorted_images_btn_no.sizePolicy().hasHeightForWidth())
         self.distorted_images_btn_no.setSizePolicy(sizePolicy)
-        self.distorted_images_btn_no.setMinimumSize(QtCore.QSize(80, 0))
+        self.distorted_images_btn_no.setMinimumSize(QtCore.QSize(0, 0))
         self.distorted_images_btn_no.setMaximumSize(QtCore.QSize(80, 16777215))
+        font = QtGui.QFont()
+        font.setFamily("Arial")
+        font.setPointSize(-1)
+        self.distorted_images_btn_no.setFont(font)
         self.distorted_images_btn_no.setStyleSheet("color: #FAFAFA;\n"
 "border: none;\n"
 "background: #616161;\n"
-"font-size: 11px;\n"
+"font-size: 10px;\n"
 "padding: 5px;")
         self.distorted_images_btn_no.setChecked(True)
         self.distorted_images_btn_no.setObjectName("distorted_images_btn_no")
@@ -306,12 +375,16 @@ class Ui_MainWindow(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.distorted_images_btn_yes.sizePolicy().hasHeightForWidth())
         self.distorted_images_btn_yes.setSizePolicy(sizePolicy)
-        self.distorted_images_btn_yes.setMinimumSize(QtCore.QSize(80, 0))
+        self.distorted_images_btn_yes.setMinimumSize(QtCore.QSize(0, 0))
         self.distorted_images_btn_yes.setMaximumSize(QtCore.QSize(80, 16777215))
+        font = QtGui.QFont()
+        font.setFamily("Arial")
+        font.setPointSize(-1)
+        self.distorted_images_btn_yes.setFont(font)
         self.distorted_images_btn_yes.setStyleSheet("color: #FAFAFA;\n"
 "border: none;\n"
 "background: #616161;\n"
-"font-size: 11px;\n"
+"font-size: 10px;\n"
 "padding: 5px;")
         self.distorted_images_btn_yes.setObjectName("distorted_images_btn_yes")
         self.gridLayout_2.addWidget(self.distorted_images_btn_yes, 0, 1, 1, 1)
@@ -324,7 +397,7 @@ class Ui_MainWindow(object):
         self.distorted_images_label.setMinimumSize(QtCore.QSize(200, 0))
         self.distorted_images_label.setMaximumSize(QtCore.QSize(200, 16777215))
         font = QtGui.QFont()
-        font.setFamily("Segoe UI")
+        font.setFamily("Arial")
         font.setPointSize(-1)
         font.setBold(False)
         font.setWeight(50)
@@ -345,6 +418,12 @@ class Ui_MainWindow(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.all_collisions_frame.sizePolicy().hasHeightForWidth())
         self.all_collisions_frame.setSizePolicy(sizePolicy)
+        font = QtGui.QFont()
+        font.setFamily("Arial")
+        font.setPointSize(9)
+        font.setBold(False)
+        font.setWeight(50)
+        self.all_collisions_frame.setFont(font)
         self.all_collisions_frame.setStyleSheet("background: #757575;\n"
 "border-radius: 2px;")
         self.all_collisions_frame.setFrameShape(QtWidgets.QFrame.StyledPanel)
@@ -358,12 +437,16 @@ class Ui_MainWindow(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.all_collisions_btn_no.sizePolicy().hasHeightForWidth())
         self.all_collisions_btn_no.setSizePolicy(sizePolicy)
-        self.all_collisions_btn_no.setMinimumSize(QtCore.QSize(80, 0))
+        self.all_collisions_btn_no.setMinimumSize(QtCore.QSize(0, 0))
         self.all_collisions_btn_no.setMaximumSize(QtCore.QSize(80, 16777215))
+        font = QtGui.QFont()
+        font.setFamily("Arial")
+        font.setPointSize(-1)
+        self.all_collisions_btn_no.setFont(font)
         self.all_collisions_btn_no.setStyleSheet("color: #FAFAFA;\n"
 "border: none;\n"
 "background: #616161;\n"
-"font-size: 11px;\n"
+"font-size: 10px;\n"
 "padding: 5px;")
         self.all_collisions_btn_no.setChecked(True)
         self.all_collisions_btn_no.setObjectName("all_collisions_btn_no")
@@ -374,12 +457,16 @@ class Ui_MainWindow(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.all_collisions_btn_yes.sizePolicy().hasHeightForWidth())
         self.all_collisions_btn_yes.setSizePolicy(sizePolicy)
-        self.all_collisions_btn_yes.setMinimumSize(QtCore.QSize(80, 0))
+        self.all_collisions_btn_yes.setMinimumSize(QtCore.QSize(0, 0))
         self.all_collisions_btn_yes.setMaximumSize(QtCore.QSize(80, 16777215))
+        font = QtGui.QFont()
+        font.setFamily("Arial")
+        font.setPointSize(-1)
+        self.all_collisions_btn_yes.setFont(font)
         self.all_collisions_btn_yes.setStyleSheet("color: #FAFAFA;\n"
 "border: none;\n"
 "background: #616161;\n"
-"font-size: 11px;\n"
+"font-size: 10px;\n"
 "padding: 5px;")
         self.all_collisions_btn_yes.setObjectName("all_collisions_btn_yes")
         self.gridLayout.addWidget(self.all_collisions_btn_yes, 0, 1, 1, 1)
@@ -392,7 +479,7 @@ class Ui_MainWindow(object):
         self.all_collisions_label.setMinimumSize(QtCore.QSize(200, 0))
         self.all_collisions_label.setMaximumSize(QtCore.QSize(200, 16777215))
         font = QtGui.QFont()
-        font.setFamily("Segoe UI")
+        font.setFamily("Arial")
         font.setPointSize(-1)
         font.setBold(False)
         font.setWeight(50)
@@ -408,6 +495,10 @@ class Ui_MainWindow(object):
         self.gridLayout.addWidget(self.all_collisions_label, 0, 0, 2, 1)
         self.image_holder_box_title = QtWidgets.QGroupBox(self.single_file_check)
         self.image_holder_box_title.setGeometry(QtCore.QRect(690, 10, 321, 221))
+        font = QtGui.QFont()
+        font.setFamily("Arial")
+        font.setPointSize(-1)
+        self.image_holder_box_title.setFont(font)
         self.image_holder_box_title.setStyleSheet("QGroupBox {\n"
 "border-color: #FAFAFA;\n"
 "background-color:#616161;\n"
@@ -418,13 +509,19 @@ class Ui_MainWindow(object):
 "font-weight: bold;\n"
 "border-top-left-radius: 2px;\n"
 "border-top-right-radius: 2px;\n"
-"padding: 2px 34px;\n"
+"padding: 2px 37px;\n"
 "background-color: #424242;\n"
 "color: #FAFAFA;\n"
 "}")
         self.image_holder_box_title.setObjectName("image_holder_box_title")
         self.image_holder = QtWidgets.QLabel(self.image_holder_box_title)
         self.image_holder.setGeometry(QtCore.QRect(10, 30, 301, 181))
+        font = QtGui.QFont()
+        font.setFamily("Arial")
+        font.setPointSize(9)
+        font.setBold(False)
+        font.setWeight(50)
+        self.image_holder.setFont(font)
         self.image_holder.setStyleSheet("border: 1px dashed #FAFAFA;\n"
 "background: #424242;\n"
 "border-radius: 2px;\n"
@@ -434,6 +531,10 @@ class Ui_MainWindow(object):
         self.image_holder.setObjectName("image_holder")
         self.unloading_settings = QtWidgets.QGroupBox(self.single_file_check)
         self.unloading_settings.setGeometry(QtCore.QRect(690, 560, 321, 81))
+        font = QtGui.QFont()
+        font.setFamily("Arial")
+        font.setPointSize(-1)
+        self.unloading_settings.setFont(font)
         self.unloading_settings.setStyleSheet("QGroupBox {\n"
 "border-color: #FAFAFA;\n"
 "background-color:#616161;\n"
@@ -452,24 +553,38 @@ class Ui_MainWindow(object):
         self.horizontalLayout_2 = QtWidgets.QHBoxLayout(self.unloading_settings)
         self.horizontalLayout_2.setObjectName("horizontalLayout_2")
         self.unloading_btn3 = QtWidgets.QRadioButton(self.unloading_settings)
+        font = QtGui.QFont()
+        font.setFamily("Arial")
+        font.setPointSize(-1)
+        self.unloading_btn3.setFont(font)
         self.unloading_btn3.setStyleSheet("color: #FAFAFA;\n"
 "background-color: #616161;\n"
 "border: none;\n"
 "font-size: 12px;\n"
 "margin-bottom: 10px;\n"
 "                                ")
+        self.unloading_btn3.setChecked(True)
         self.unloading_btn3.setObjectName("unloading_btn3")
         self.horizontalLayout_2.addWidget(self.unloading_btn3)
         self.unloading_btn2 = QtWidgets.QRadioButton(self.unloading_settings)
+        font = QtGui.QFont()
+        font.setFamily("Arial")
+        font.setPointSize(-1)
+        self.unloading_btn2.setFont(font)
         self.unloading_btn2.setStyleSheet("color: #FAFAFA;\n"
 "background-color: #616161;\n"
 "border: none;\n"
 "font-size: 12px;\n"
 "margin-bottom: 10px;\n"
 "                                ")
+        self.unloading_btn2.setCheckable(False)
         self.unloading_btn2.setObjectName("unloading_btn2")
         self.horizontalLayout_2.addWidget(self.unloading_btn2)
         self.unloading_btn1 = QtWidgets.QRadioButton(self.unloading_settings)
+        font = QtGui.QFont()
+        font.setFamily("Arial")
+        font.setPointSize(-1)
+        self.unloading_btn1.setFont(font)
         self.unloading_btn1.setStyleSheet("color: #FAFAFA;\n"
 "background-color: #616161;\n"
 "border: none;\n"
@@ -478,7 +593,6 @@ class Ui_MainWindow(object):
 "                                ")
         self.unloading_btn1.setObjectName("unloading_btn1")
         self.horizontalLayout_2.addWidget(self.unloading_btn1)
-        self.input_data.raise_()
         self.slides_box.raise_()
         self.statusbar.raise_()
         self.groupBox.raise_()
@@ -486,27 +600,28 @@ class Ui_MainWindow(object):
         self.unloading_settings.raise_()
         self.get_answer.raise_()
         self.main_tab_widget.addTab(self.single_file_check, "")
-        self.many_files_check = QtWidgets.QWidget()
-        self.many_files_check.setStyleSheet("border: 1px solid #FAFAFA;\n"
-"                            background-color: #263238;\n"
-"                        ")
-        self.many_files_check.setObjectName("many_files_check")
-        self.main_tab_widget.addTab(self.many_files_check, "")
         MainWindow.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(MainWindow)
-        self.main_tab_widget.setCurrentIndex(0)
+        self.main_tab_widget.setCurrentIndex(1)
         self.slides_box.setCurrentIndex(1)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "Проверка задания ОГЭ"))
-        self.input_data.setHtml(_translate("MainWindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+        MainWindow.setWindowTitle(_translate("MainWindow", "Проверка задания 13.2 формата ОГЭ 2020"))
+        self.input_data_2.setHtml(_translate("MainWindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
-"</style></head><body style=\" font-family:\'Segoe UI\'; font-size:10px; font-weight:400; font-style:normal;\">\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:10pt;\">Загружать файлы можно только по одному. Автоматически проверяются все критерии кроме коллизий. Для проверки коллизий реализован вывод презентаций в виде картинок, строка состояния внизу выводит ответ или ошибки. Конечный файл можно выгрузить в файл формата .xlsx. </span><span style=\" font-size:10pt; font-weight:600;\">Файл можно перетащить в любое место окна</span><span style=\" font-size:10pt;\">.                            </span></p></body></html>"))
+"</style></head><body style=\" font-family:\'Arial\'; font-size:10pt; font-weight:400; font-style:normal;\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Segoe UI\'; font-size:12pt;\">Программа представляет собой интерфейс-обёртку проверки презентаций ориентированную на работу с заданием 23 ОГЭ по информатике. Цель - облегчить работу экспертам по проверке ОГЭ.</span></p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Segoe UI\'; font-size:12pt;\">  </span></p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Segoe UI\'; font-size:12pt;\">Реализована проверка всех критериев кроме различных коллизий, а так же соответствия презентации теме. Для проверки коллизий реализован вывод презентаций в виде картинок, а что бы облегчить проверку соответствия теме, реализован вывод ТОП-5 слов из презентации(за исключением слов длинна которых менее чем 3 символа). </span></p>\n"
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:\'Segoe UI\'; font-size:12pt;\"><br /></p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Segoe UI\'; font-size:12pt;\">Строка состояния внизу выводит ответ(при наличии отмеченного соответствующей радио-кнопки) или ошибки. Конечный файл можно выгрузить в файл формата .txt. </span></p>\n"
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:\'Segoe UI\'; font-size:12pt;\"><br /></p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Segoe UI\'; font-size:12pt; font-weight:600;\">Файл можно перетащить в любое место окна</span><span style=\" font-family:\'Segoe UI\'; font-size:12pt;\">.   </span></p></body></html>"))
+        self.main_tab_widget.setTabText(self.main_tab_widget.indexOf(self.about_program), _translate("MainWindow", "О программе"))
         self.slides_box.setItemText(self.slides_box.indexOf(self.slide1_page), _translate("MainWindow", "Слайд 2"))
         self.slides_box.setItemText(self.slides_box.indexOf(self.slide2_page), _translate("MainWindow", "Слайд 3"))
         self.statusbar.setPlaceholderText(_translate("MainWindow", "Статусбар"))
@@ -530,4 +645,3 @@ class Ui_MainWindow(object):
         self.unloading_btn2.setText(_translate("MainWindow", "В .xlsx файл"))
         self.unloading_btn1.setText(_translate("MainWindow", "В .txt файл"))
         self.main_tab_widget.setTabText(self.main_tab_widget.indexOf(self.single_file_check), _translate("MainWindow", "Единичная проверка"))
-        self.main_tab_widget.setTabText(self.main_tab_widget.indexOf(self.many_files_check), _translate("MainWindow", "Множественная проверка"))

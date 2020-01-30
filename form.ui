@@ -7,11 +7,34 @@
     <x>0</x>
     <y>0</y>
     <width>1020</width>
-    <height>672</height>
+    <height>675</height>
    </rect>
   </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>1020</width>
+    <height>675</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>1020</width>
+    <height>675</height>
+   </size>
+  </property>
+  <property name="font">
+   <font>
+    <family>Arial</family>
+   </font>
+  </property>
   <property name="windowTitle">
-   <string>Проверка задания ОГЭ</string>
+   <string>Проверка задания 13.2 формата ОГЭ 2020</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <property name="styleSheet">
@@ -37,43 +60,46 @@
     </property>
     <property name="font">
      <font>
-      <family>Segoe UI</family>
+      <family>Arial</family>
+      <pointsize>9</pointsize>
+      <weight>50</weight>
+      <bold>false</bold>
      </font>
     </property>
     <property name="styleSheet">
      <string notr="true">border: none;</string>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>1</number>
     </property>
     <property name="tabBarAutoHide">
      <bool>true</bool>
     </property>
-    <widget class="QWidget" name="single_file_check">
+    <widget class="QWidget" name="about_program">
      <property name="styleSheet">
-      <string notr="true">background-color: #212121;</string>
+      <string notr="true">border: none;
+background: #212121;</string>
      </property>
      <attribute name="title">
-      <string>Единичная проверка</string>
+      <string>О программе</string>
      </attribute>
-     <widget class="QTextEdit" name="input_data">
+     <widget class="QTextEdit" name="input_data_2">
       <property name="geometry">
        <rect>
-        <x>10</x>
-        <y>10</y>
-        <width>671</width>
-        <height>81</height>
+        <x>150</x>
+        <y>170</y>
+        <width>741</width>
+        <height>301</height>
        </rect>
       </property>
       <property name="font">
        <font>
-        <family>Segoe UI</family>
-        <pointsize>-1</pointsize>
+        <family>Arial</family>
+        <pointsize>10</pointsize>
        </font>
       </property>
       <property name="styleSheet">
        <string notr="true">color: #FAFAFA;
-font-size: 10px;
 background-color: #424242;
 border: none;
 border-radius: 2px;
@@ -83,18 +109,40 @@ border-radius: 2px;
        <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:10px; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Загружать файлы можно только по одному. Автоматически проверяются все критерии кроме коллизий. Для проверки коллизий реализован вывод презентаций в виде картинок, строка состояния внизу выводит ответ или ошибки. Конечный файл можно выгрузить в файл формата .xlsx. &lt;/span&gt;&lt;span style=&quot; font-size:10pt; font-weight:600;&quot;&gt;Файл можно перетащить в любое место окна&lt;/span&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;.                            &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Arial'; font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Segoe UI'; font-size:12pt;&quot;&gt;Программа представляет собой интерфейс-обёртку проверки презентаций ориентированную на работу с заданием 23 ОГЭ по информатике. Цель - облегчить работу экспертам по проверке ОГЭ.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Segoe UI'; font-size:12pt;&quot;&gt;  &lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Segoe UI'; font-size:12pt;&quot;&gt;Реализована проверка всех критериев кроме различных коллизий, а так же соответствия презентации теме. Для проверки коллизий реализован вывод презентаций в виде картинок, а что бы облегчить проверку соответствия теме, реализован вывод ТОП-5 слов из презентации(за исключением слов длинна которых менее чем 3 символа). &lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Segoe UI'; font-size:12pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Segoe UI'; font-size:12pt;&quot;&gt;Строка состояния внизу выводит ответ(при наличии отмеченного соответствующей радио-кнопки) или ошибки. Конечный файл можно выгрузить в файл формата .txt. &lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Segoe UI'; font-size:12pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Segoe UI'; font-size:12pt; font-weight:600;&quot;&gt;Файл можно перетащить в любое место окна&lt;/span&gt;&lt;span style=&quot; font-family:'Segoe UI'; font-size:12pt;&quot;&gt;.   &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
      </widget>
+    </widget>
+    <widget class="QWidget" name="single_file_check">
+     <property name="styleSheet">
+      <string notr="true">background-color: #212121;</string>
+     </property>
+     <attribute name="title">
+      <string>Единичная проверка</string>
+     </attribute>
      <widget class="QToolBox" name="slides_box">
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>100</y>
-        <width>671</width>
-        <height>451</height>
+        <y>10</y>
+        <width>670</width>
+        <height>450</height>
        </rect>
+      </property>
+      <property name="font">
+       <font>
+        <family>Arial</family>
+        <pointsize>-1</pointsize>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
       </property>
       <property name="styleSheet">
        <string notr="true">border: 1px solid #FAFAFA;
@@ -113,8 +161,8 @@ p, li { white-space: pre-wrap; }
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>651</width>
-         <height>375</height>
+         <width>90</width>
+         <height>20</height>
         </rect>
        </property>
        <property name="styleSheet">
@@ -151,8 +199,8 @@ p, li { white-space: pre-wrap; }
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>651</width>
-         <height>375</height>
+         <width>650</width>
+         <height>372</height>
         </rect>
        </property>
        <property name="styleSheet">
@@ -169,6 +217,14 @@ p, li { white-space: pre-wrap; }
           <width>651</width>
           <height>381</height>
          </rect>
+        </property>
+        <property name="font">
+         <font>
+          <family>Arial</family>
+          <pointsize>-1</pointsize>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
         </property>
         <property name="text">
          <string notr="true"/>
@@ -189,10 +245,18 @@ p, li { white-space: pre-wrap; }
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>560</y>
+        <y>470</y>
         <width>671</width>
-        <height>81</height>
+        <height>171</height>
        </rect>
+      </property>
+      <property name="font">
+       <font>
+        <family>Arial</family>
+        <pointsize>9</pointsize>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
       </property>
       <property name="styleSheet">
        <string notr="true">border: none;
@@ -201,7 +265,6 @@ padding-right: 4px;
 color: #fafafa;
 background-color: #424242;
 border-radius: 2px;
-font-weight: bold;
                             </string>
       </property>
       <property name="placeholderText">
@@ -219,8 +282,8 @@ font-weight: bold;
       </property>
       <property name="font">
        <font>
-        <family>Segoe UI</family>
-        <pointsize>-1</pointsize>
+        <family>Arial</family>
+        <pointsize>9</pointsize>
         <weight>75</weight>
         <bold>true</bold>
        </font>
@@ -234,7 +297,6 @@ font-weight: bold;
 	background-color: #424242;
 	border: none;
 	color: #FAFAFA;
-	font-size: 12px;
     font-weight: bold;
 }
 QPushButton:hover {
@@ -258,6 +320,12 @@ QPushButton:clicked {
         <width>321</width>
         <height>311</height>
        </rect>
+      </property>
+      <property name="font">
+       <font>
+        <family>Arial</family>
+        <pointsize>-1</pointsize>
+       </font>
       </property>
       <property name="styleSheet">
        <string notr="true">QGroupBox {
@@ -293,6 +361,14 @@ color: #FAFAFA;
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="font">
+        <font>
+         <family>Arial</family>
+         <pointsize>9</pointsize>
+         <weight>50</weight>
+         <bold>false</bold>
+        </font>
+       </property>
        <property name="styleSheet">
         <string notr="true">background: #757575;
 border-radius: 2px;</string>
@@ -312,11 +388,17 @@ border-radius: 2px;</string>
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <property name="font">
+           <font>
+            <family>Arial</family>
+            <pointsize>-1</pointsize>
+           </font>
+          </property>
           <property name="styleSheet">
            <string notr="true">color: #FAFAFA;
 border: none;
 background: #616161;
-font-size: 11px;
+font-size: 10px;
 padding: 5px;</string>
           </property>
           <property name="text">
@@ -332,11 +414,17 @@ padding: 5px;</string>
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <property name="font">
+           <font>
+            <family>Arial</family>
+            <pointsize>-1</pointsize>
+           </font>
+          </property>
           <property name="styleSheet">
            <string notr="true">color: #FAFAFA;
 border: none;
 background: #616161;
-font-size: 11px;
+font-size: 10px;
 padding: 5px;</string>
           </property>
           <property name="text">
@@ -369,7 +457,7 @@ padding: 5px;</string>
           </property>
           <property name="font">
            <font>
-            <family>Segoe UI</family>
+            <family>Arial</family>
             <pointsize>-1</pointsize>
             <weight>50</weight>
             <bold>false</bold>
@@ -408,6 +496,14 @@ padding: 5px;</string>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="font">
+        <font>
+         <family>Arial</family>
+         <pointsize>9</pointsize>
+         <weight>50</weight>
+         <bold>false</bold>
+        </font>
+       </property>
        <property name="styleSheet">
         <string notr="true">background: #757575;
 border-radius: 2px;</string>
@@ -427,11 +523,17 @@ border-radius: 2px;</string>
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <property name="font">
+           <font>
+            <family>Arial</family>
+            <pointsize>-1</pointsize>
+           </font>
+          </property>
           <property name="styleSheet">
            <string notr="true">color: #FAFAFA;
 border: none;
 background: #616161;
-font-size: 11px;
+font-size: 10px;
 padding: 5px;</string>
           </property>
           <property name="text">
@@ -450,11 +552,17 @@ padding: 5px;</string>
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <property name="font">
+           <font>
+            <family>Arial</family>
+            <pointsize>-1</pointsize>
+           </font>
+          </property>
           <property name="styleSheet">
            <string notr="true">color: #FAFAFA;
 border: none;
 background: #616161;
-font-size: 11px;
+font-size: 10px;
 padding: 5px;</string>
           </property>
           <property name="text">
@@ -484,7 +592,7 @@ padding: 5px;</string>
           </property>
           <property name="font">
            <font>
-            <family>Segoe UI</family>
+            <family>Arial</family>
             <pointsize>-1</pointsize>
             <weight>50</weight>
             <bold>false</bold>
@@ -525,7 +633,7 @@ padding: 5px;</string>
        </property>
        <property name="font">
         <font>
-         <family>Segoe UI</family>
+         <family>Arial</family>
          <pointsize>9</pointsize>
          <weight>50</weight>
          <bold>false</bold>
@@ -552,7 +660,7 @@ border-radius: 2px;</string>
           </property>
           <property name="minimumSize">
            <size>
-            <width>80</width>
+            <width>0</width>
             <height>0</height>
            </size>
           </property>
@@ -562,11 +670,17 @@ border-radius: 2px;</string>
             <height>16777215</height>
            </size>
           </property>
+          <property name="font">
+           <font>
+            <family>Arial</family>
+            <pointsize>-1</pointsize>
+           </font>
+          </property>
           <property name="styleSheet">
            <string notr="true">color: #FAFAFA;
 border: none;
 background: #616161;
-font-size: 11px;
+font-size: 10px;
 padding: 5px;</string>
           </property>
           <property name="text">
@@ -587,7 +701,7 @@ padding: 5px;</string>
           </property>
           <property name="minimumSize">
            <size>
-            <width>80</width>
+            <width>0</width>
             <height>0</height>
            </size>
           </property>
@@ -597,11 +711,17 @@ padding: 5px;</string>
             <height>16777215</height>
            </size>
           </property>
+          <property name="font">
+           <font>
+            <family>Arial</family>
+            <pointsize>-1</pointsize>
+           </font>
+          </property>
           <property name="styleSheet">
            <string notr="true">color: #FAFAFA;
 border: none;
 background: #616161;
-font-size: 11px;
+font-size: 10px;
 padding: 5px;</string>
           </property>
           <property name="text">
@@ -631,7 +751,7 @@ padding: 5px;</string>
           </property>
           <property name="font">
            <font>
-            <family>Segoe UI</family>
+            <family>Arial</family>
             <pointsize>-1</pointsize>
             <weight>50</weight>
             <bold>false</bold>
@@ -670,6 +790,14 @@ padding: 5px;</string>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="font">
+        <font>
+         <family>Arial</family>
+         <pointsize>9</pointsize>
+         <weight>50</weight>
+         <bold>false</bold>
+        </font>
+       </property>
        <property name="styleSheet">
         <string notr="true">background: #757575;
 border-radius: 2px;</string>
@@ -691,7 +819,7 @@ border-radius: 2px;</string>
           </property>
           <property name="minimumSize">
            <size>
-            <width>80</width>
+            <width>0</width>
             <height>0</height>
            </size>
           </property>
@@ -701,11 +829,17 @@ border-radius: 2px;</string>
             <height>16777215</height>
            </size>
           </property>
+          <property name="font">
+           <font>
+            <family>Arial</family>
+            <pointsize>-1</pointsize>
+           </font>
+          </property>
           <property name="styleSheet">
            <string notr="true">color: #FAFAFA;
 border: none;
 background: #616161;
-font-size: 11px;
+font-size: 10px;
 padding: 5px;</string>
           </property>
           <property name="text">
@@ -726,7 +860,7 @@ padding: 5px;</string>
           </property>
           <property name="minimumSize">
            <size>
-            <width>80</width>
+            <width>0</width>
             <height>0</height>
            </size>
           </property>
@@ -736,11 +870,17 @@ padding: 5px;</string>
             <height>16777215</height>
            </size>
           </property>
+          <property name="font">
+           <font>
+            <family>Arial</family>
+            <pointsize>-1</pointsize>
+           </font>
+          </property>
           <property name="styleSheet">
            <string notr="true">color: #FAFAFA;
 border: none;
 background: #616161;
-font-size: 11px;
+font-size: 10px;
 padding: 5px;</string>
           </property>
           <property name="text">
@@ -770,7 +910,7 @@ padding: 5px;</string>
           </property>
           <property name="font">
            <font>
-            <family>Segoe UI</family>
+            <family>Arial</family>
             <pointsize>-1</pointsize>
             <weight>50</weight>
             <bold>false</bold>
@@ -804,6 +944,12 @@ padding: 5px;</string>
         <height>221</height>
        </rect>
       </property>
+      <property name="font">
+       <font>
+        <family>Arial</family>
+        <pointsize>-1</pointsize>
+       </font>
+      </property>
       <property name="styleSheet">
        <string notr="true">QGroupBox {
 border-color: #FAFAFA;
@@ -815,7 +961,7 @@ QGroupBox::title {
 font-weight: bold;
 border-top-left-radius: 2px;
 border-top-right-radius: 2px;
-padding: 2px 34px;
+padding: 2px 37px;
 background-color: #424242;
 color: #FAFAFA;
 }</string>
@@ -831,6 +977,14 @@ color: #FAFAFA;
          <width>301</width>
          <height>181</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Arial</family>
+         <pointsize>9</pointsize>
+         <weight>50</weight>
+         <bold>false</bold>
+        </font>
        </property>
        <property name="styleSheet">
         <string notr="true">border: 1px dashed #FAFAFA;
@@ -855,6 +1009,12 @@ border-radius: 2px;
         <height>81</height>
        </rect>
       </property>
+      <property name="font">
+       <font>
+        <family>Arial</family>
+        <pointsize>-1</pointsize>
+       </font>
+      </property>
       <property name="styleSheet">
        <string notr="true">QGroupBox {
 border-color: #FAFAFA;
@@ -877,6 +1037,12 @@ color: #FAFAFA;
       <layout class="QHBoxLayout" name="horizontalLayout_2">
        <item>
         <widget class="QRadioButton" name="unloading_btn3">
+         <property name="font">
+          <font>
+           <family>Arial</family>
+           <pointsize>-1</pointsize>
+          </font>
+         </property>
          <property name="styleSheet">
           <string notr="true">color: #FAFAFA;
 background-color: #616161;
@@ -888,10 +1054,19 @@ margin-bottom: 10px;
          <property name="text">
           <string>В статусбар</string>
          </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
         </widget>
        </item>
        <item>
         <widget class="QRadioButton" name="unloading_btn2">
+         <property name="font">
+          <font>
+           <family>Arial</family>
+           <pointsize>-1</pointsize>
+          </font>
+         </property>
          <property name="styleSheet">
           <string notr="true">color: #FAFAFA;
 background-color: #616161;
@@ -903,10 +1078,19 @@ margin-bottom: 10px;
          <property name="text">
           <string>В .xlsx файл</string>
          </property>
+         <property name="checkable">
+          <bool>false</bool>
+         </property>
         </widget>
        </item>
        <item>
         <widget class="QRadioButton" name="unloading_btn1">
+         <property name="font">
+          <font>
+           <family>Arial</family>
+           <pointsize>-1</pointsize>
+          </font>
+         </property>
          <property name="styleSheet">
           <string notr="true">color: #FAFAFA;
 background-color: #616161;
@@ -922,25 +1106,12 @@ margin-bottom: 10px;
        </item>
       </layout>
      </widget>
-     <zorder>input_data</zorder>
      <zorder>slides_box</zorder>
      <zorder>statusbar</zorder>
-     <zorder>verticalLayoutWidget_2</zorder>
      <zorder>groupBox</zorder>
-     <zorder>formLayoutWidget</zorder>
      <zorder>image_holder_box_title</zorder>
      <zorder>unloading_settings</zorder>
      <zorder>get_answer</zorder>
-    </widget>
-    <widget class="QWidget" name="many_files_check">
-     <property name="styleSheet">
-      <string notr="true">border: 1px solid #FAFAFA;
-                            background-color: #263238;
-                        </string>
-     </property>
-     <attribute name="title">
-      <string>Множественная проверка</string>
-     </attribute>
     </widget>
    </widget>
   </widget>
