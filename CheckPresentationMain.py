@@ -3,7 +3,7 @@ import re
 import json
 import os
 import pandas as pd
-import textwrap
+import warnings
 
 from pathlib import Path
 from pandas.errors import EmptyDataError
@@ -20,6 +20,7 @@ class CheckPresentationUtils:
     :param self.text_threshold: После скольки символов текст считается осмысленным и его можно засчитывать как текст.
     :type self.text_threshold: int
     """
+
     def __init__(self):
         super().__init__()
         self.text_threshold = TEXT_THRESHOLD
@@ -55,7 +56,7 @@ class CheckPresentationUtils:
         :rtype: bool
         """
         if shape.is_placeholder and (
-            shape.placeholder_format.type == PP_PLACEHOLDER_TYPE.TITLE
+                shape.placeholder_format.type == PP_PLACEHOLDER_TYPE.TITLE
                 or shape.placeholder_format.type == PP_PLACEHOLDER_TYPE.SUBTITLE
                 or shape.placeholder_format.type == PP_PLACEHOLDER_TYPE.VERTICAL_TITLE
                 or shape.placeholder_format.type == PP_PLACEHOLDER_TYPE.CENTER_TITLE):
@@ -172,6 +173,7 @@ class CheckPresentationGetData(CheckPresentationUtils):
     """
     :param presentation: Обьект Presentation() из python-pptx
     """
+
     def __init__(self, presentation):
         super().__init__()
         self.presentation = presentation
@@ -222,7 +224,15 @@ class CheckPresentationGetData(CheckPresentationUtils):
         return self.convert_emu_px(self.presentation.slide_width), self.convert_emu_px(self.presentation.slide_height)
 
     def get_font_size_by_shape(self, shape):
-        font_sizes = []
+        """
+        Возвращает размер шрифта в слайде, если по каким то причинам размер шрифта не найден, то получаем размер
+        шрифта по умолчанию для list style lvl1 как самый частый.
+        ================================================================================================================
+        :param shape: shape obj/class презентации
+        :return font_sizes: Размеры шрифта в shape
+        :rtype tuple of float
+        """
+        font_sizes = tuple()
         for paragraph in shape.text_frame.paragraphs:
             for run in paragraph.runs:
                 try:
@@ -242,6 +252,8 @@ class CheckPresentationGetData(CheckPresentationUtils):
         #  то размер шрифта по умолчанию будет 18.0, как самый часто встречающийся.
         #  https://github.com/scanny/python-pptx/issues/337
         if len(font_sizes) == 0:
+            warnings.warn(f'Не удалось получить точный размер шрифта. Получен размер шрифта по умолчанию, возможно '
+                          f'потребуется ручная проверка', UserWarning)
             font_sizes.append(18.0)
         return font_sizes
 
@@ -285,7 +297,7 @@ class CheckPresentationGetData(CheckPresentationUtils):
             for shape in slide.shapes:
                 if self.is_text(shape):
                     font_size = self.get_font_size_by_shape(shape)
-                    left_top     = (self.convert_emu_px(shape.left), self.convert_emu_px(shape.top))
+                    left_top = (self.convert_emu_px(shape.left), self.convert_emu_px(shape.top))
                     width_height = (self.convert_emu_px(shape.width), self.convert_emu_px(shape.height))
                     shape_text = shape.text_frame.text.strip()
                     text_on_slides[slide_index].append([left_top, width_height, shape_text, font_size])
@@ -306,9 +318,9 @@ class CheckPresentationGetData(CheckPresentationUtils):
         """
         :param slide_id: ID слайда
         :return font_sizes: Все существубщие размеры текста в слайде
-        :rtype font_sizes: list of float
+        :rtype font_sizes: tuple of float
         """
-        font_sizes = []
+        font_sizes = tuple()
         for shape in self.get_shapes_by_slide_id(slide_id):
             if self.is_text(shape):
                 for paragraph in shape.text_frame.paragraphs:
@@ -320,7 +332,7 @@ class CheckPresentationGetData(CheckPresentationUtils):
                                 font_sizes.append(run.font.size.pt)
                             else:
                                 font_sizes.append(run.font.size.pt *
-                                                         shape.text_frame._bodyPr.normAutofit.fontScale / 100)
+                                                  shape.text_frame._bodyPr.normAutofit.fontScale / 100)
                         except AttributeError:
                             pass
         return font_sizes
@@ -466,16 +478,16 @@ class CheckPresentationAnalyze(CheckPresentationGetData):
         :param results: Принимает результат работы analyze_results()
         :return: Dict где ключ переведён из ID в Str
         """
-        results['Количество слайдов']                   = results.pop(0)
+        results['Количество слайдов'] = results.pop(0)
         results['Блоки текста и изображений размещены'] = results.pop(1)
-        results['Название на титульном']                = results.pop(2)
-        results['Название на 2м и 3м слайде']           = results.pop(3)
-        results['Соответствие теме']                    = results.pop(4)
-        results['Единый шрифт']                         = results.pop(5)
-        results['Правильный размер шрифта']             = results.pop(6)
-        results['Текст не перекрывает изображения']     = results.pop(7)
-        results['Изображения не искажены']              = results.pop(8)
-        results['Изображения не перекрывают элементы']  = results.pop(9)
+        results['Название на титульном'] = results.pop(2)
+        results['Название на 2м и 3м слайде'] = results.pop(3)
+        results['Соответствие теме'] = results.pop(4)
+        results['Единый шрифт'] = results.pop(5)
+        results['Правильный размер шрифта'] = results.pop(6)
+        results['Текст не перекрывает изображения'] = results.pop(7)
+        results['Изображения не искажены'] = results.pop(8)
+        results['Изображения не перекрывают элементы'] = results.pop(9)
         return results
 
     def analyze_results(self, txt_img_collisions_btn=False, distorted_images_btn=False, all_collisions_btn=False,
@@ -518,8 +530,8 @@ class CheckPresentationAnalyze(CheckPresentationGetData):
             9: all_collisions_btn,
         }
         slides_contents = self.get_slides_contents()
-        font_sizes      = self.get_font_sizes()
-        typefaces       = self.get_typefaces()
+        font_sizes = self.get_font_sizes()
+        typefaces = self.get_typefaces()
         # Check first slide #
         slide1_font_size = 0
         slide1_blocks_correct = 0
@@ -539,11 +551,11 @@ class CheckPresentationAnalyze(CheckPresentationGetData):
         if max(font_sizes[2]) == 24 and min(font_sizes[2]) == 20:
             slide2_font_size = 1
         if slides_contents[2]['textCounter'] + slides_contents[2]['titleCounter'] == 3 and \
-           slides_contents[2]['pictureCounter'] == 2:
+                slides_contents[2]['pictureCounter'] == 2:
             slide2_blocks_correct = 1
             slide2_title = 1
         if slides_contents[2]['textCounter'] + slides_contents[2]['titleCounter'] == 2 and \
-           slides_contents[2]['pictureCounter'] == 2:
+                slides_contents[2]['pictureCounter'] == 2:
             slide2_blocks_correct = 1
         # End second slide #
 
@@ -554,10 +566,10 @@ class CheckPresentationAnalyze(CheckPresentationGetData):
         if max(font_sizes[3]) == 24 and min(font_sizes[3]) == 20:
             slide3_font_size = 1
         if slides_contents[3]['textCounter'] + slides_contents[3]['titleCounter'] == 3 and \
-           slides_contents[3]['pictureCounter'] == 3:
+                slides_contents[3]['pictureCounter'] == 3:
             slide3_blocks_correct = 1
         if slides_contents[3]['textCounter'] + slides_contents[3]['titleCounter'] == 4 and \
-           slides_contents[3]['pictureCounter'] == 3:
+                slides_contents[3]['pictureCounter'] == 3:
             slide3_blocks_correct = 1
             slide3_title = 1
         if slides_contents[3]['titleCounter'] == 1:
@@ -594,18 +606,19 @@ class PrintTo:
     TODO: Добавить поддержку изменения кодировки к PrintTo.txt
     TODO: Добавить генерацию файла Excel PrintTo.excel
     """
+
     def __init__(self, results, path_to_output, path_to_pptx, encoding='utf-8'):
-        self.results        = results
+        self.results = results
         self.path_to_output = Path(path_to_output)
-        self.path_to_pptx   = Path(path_to_pptx)
-        self.encoding       = encoding
+        self.path_to_pptx = Path(path_to_pptx)
+        self.encoding = encoding
         self.output_name, self.output_extension = os.path.splitext(self.path_to_output)
-        self.results_keys   = []
+        self.results_keys = []
         self.results_values = []
         for result in self.results:
             self.results_keys.append(result)
             self.results_values.append(self.results[result])
-        self.results_zip   = list(zip(self.results_keys, self.results_values))
+        self.results_zip = list(zip(self.results_keys, self.results_values))
         self.mode_list = ['write', 'rewrite']
 
     def _extension_check(self, extension):
@@ -690,7 +703,7 @@ class PrintTo:
         self._extension_check('.txt')
         mode = self._write_mode_check(mode)
         txt_file = open(self.path_to_output, mode=mode, encoding='utf-8')
-        if not(self._empty(self.path_to_output, '.txt')):
+        if not (self._empty(self.path_to_output, '.txt')):
             txt_file.write('\n')
         txt_file.write(f'Проверка файла: {self.path_to_pptx}\n')
         for result in self.results_zip:
@@ -710,7 +723,7 @@ class PrintTo:
         mode = self._write_mode_check(mode)
         data_without_columns = [self.results_values]
         data_with_columns = [self.results]
-        if self._empty(self.path_to_output, '.csv') or (not(self._empty(self.path_to_output, '.csv')) and mode == 'w'):
+        if self._empty(self.path_to_output, '.csv') or (not (self._empty(self.path_to_output, '.csv')) and mode == 'w'):
             self._write_to_csv(data_with_columns, self.path_to_output, mode, self.encoding)
             return 'Успешная запись в файл'
         elif not (self._empty(self.path_to_output, '.csv')) and mode == 'a':
@@ -719,4 +732,3 @@ class PrintTo:
 
     def excel(self, mode):
         pass
-
