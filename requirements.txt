@@ -1,3 +1,4 @@
+pandas
 python_pptx==0.6.18
 pygame==1.9.6
 Pillow==6.2.1
