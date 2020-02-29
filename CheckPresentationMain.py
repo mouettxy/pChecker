@@ -232,7 +232,7 @@ class CheckPresentationGetData(CheckPresentationUtils):
         :return font_sizes: Размеры шрифта в shape
         :rtype tuple of float
         """
-        font_sizes = tuple()
+        font_sizes = []
         for paragraph in shape.text_frame.paragraphs:
             for run in paragraph.runs:
                 try:
@@ -245,11 +245,6 @@ class CheckPresentationGetData(CheckPresentationUtils):
                                           shape.text_frame._bodyPr.normAutofit.fontScale / 100)
                 except AttributeError:
                     pass
-        # TODO: Реализовать нахождение реального значения размера шрифта.
-        #  (Если шрифт не указан явно, то в в run.font.size его не будет, а будет None).
-        #  Найти реальный размер шрифта можно в:
-        #  (Unzip .pptx -> ppt -> presentation.xml -> <p:defaultTextStyle>). До момента пока решение не найдено,
-        #  то размер шрифта по умолчанию будет 18.0, как самый часто встречающийся.
         #  https://github.com/scanny/python-pptx/issues/337
         if len(font_sizes) == 0:
             warnings.warn(f'Не удалось получить точный размер шрифта. Получен размер шрифта по умолчанию, возможно '
@@ -320,7 +315,7 @@ class CheckPresentationGetData(CheckPresentationUtils):
         :return font_sizes: Все существубщие размеры текста в слайде
         :rtype font_sizes: tuple of float
         """
-        font_sizes = tuple()
+        font_sizes = []
         for shape in self.get_shapes_by_slide_id(slide_id):
             if self.is_text(shape):
                 for paragraph in shape.text_frame.paragraphs:
