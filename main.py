@@ -5,7 +5,7 @@ from CheckPresentationMain import CheckPresentationAnalyze, PrintTo, CheckPresen
 from pptx import Presentation
 
 def get_slides(file_pptx):
-    return CheckPresentationGetData(Presentation(file_pptx)).get_slides_length()
+    return CheckPresentationGetData(Presentation(file_pptx)).length()
 def get_result(file_pptx):
     return CheckPresentationAnalyze(Presentation(file_pptx)).analyze_results()
 
