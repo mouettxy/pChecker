@@ -5,20 +5,41 @@ import os
 import re
 from collections import Counter
 from pathlib import Path
-from pptx import Presentation
 
+# import time
+import string
+import random
+import win32com.client
 import pandas as pd
 from PIL import Image, ImageDraw, ImageFont
 from pandas.errors import EmptyDataError
+from pptx import Presentation
 from pptx.enum.shapes import MSO_SHAPE_TYPE, PP_PLACEHOLDER_TYPE
 from pptx.enum.text import MSO_AUTO_SIZE
 
-from globals import TEXT_THRESHOLD, POSSIBLE_CROP_VALUE_ERROR, POSSIBLE_DISTORTED_IMAGE_VALUE
+from globals import *
+
+# from pp_classes import MSOPPT, MSO
+
+"""
+Issues:
+https://github.com/scanny/python-pptx/issues/147
+https://github.com/scanny/python-pptx/issues/337
+"""
+
+
+class GlobalUtils(object):
+    """
+    Даёт некоторые полезные функции/фичи для разработки. Возможно будет убран позднее.
+    """
+
+    def __init__(self, dir="D:\\Presentations"):
+        self.get_list_of_presentations = [dir + "\\" + d for d in os.listdir(dir)]
 
 
 class TextWrapper(object):
     """
-    Автор этого прелестного хелпера: Igor Pomaranskiy
+    Igor Pomaranskiy
     https://stackoverflow.com/users/535884/igor-pomaranskiy
     Helper class to wrap text in lines, based on given text, font
     and max allowed line width.
@@ -56,14 +77,11 @@ class TextWrapper(object):
         wrapped_lines = []
         buf = []
         buf_width = 0
-
         for line in self.text_lines:
             for word in line.split(' '):
                 word_width = self.get_text_width(word)
-
                 expected_width = word_width if not buf else \
                     buf_width + self.space_width + word_width
-
                 if expected_width <= self.max_width:
                     # word fits in line
                     buf_width = expected_width
@@ -73,13 +91,20 @@ class TextWrapper(object):
                     wrapped_lines.append(' '.join(buf))
                     buf = [word]
                     buf_width = word_width
-
             if buf:
                 wrapped_lines.append(' '.join(buf))
                 buf = []
                 buf_width = 0
-
         return '\n'.join(wrapped_lines)
+
+    def total_width_height(self):
+        lines = self.wrapped_text().splitlines()
+        width = []
+        height = []
+        for line in lines:
+            width.append(self.font.getsize(line)[0])
+            height.append(self.font.getsize(line)[1])
+        return max(width), sum(height) + 5
 
 
 class PrintTo:
@@ -222,9 +247,10 @@ class PrintTo:
 
 
 class CheckPresentation:
-    def __init__(self, presentation):
+    def __init__(self, path):
         super().__init__()
-        self.presentation = presentation
+        self.presentation = Presentation(path)
+        self.path_to_presentation = path
         self.text_threshold = TEXT_THRESHOLD
 
 
@@ -350,33 +376,9 @@ class CheckPresentationUtils(CheckPresentation):
             return True
         return False
 
-    def dimensions_to_draw(self, shape):
-        """
-        Возвращает словарь измерений для обьекта презентации.
-        :param shape: shape презентации
-        :type shape: class
-        :return: Словарь изменений для обьекта презентаций содержащий ключи x1, y1, x2, y2, width, height
-        :rtype: dict of (string, int)
-        """
-        width, height = self.convert_emu_px(shape.width), self.convert_emu_px(shape.height)
-        left, top = self.convert_emu_px(shape.left), self.convert_emu_px(shape.top)
-        x1, y1 = left, top
-        x2, y2 = width + x1, height + y1
-        if self.is_text(shape):
-            mb = shape.text_frame.margin_bottom
-            ml = shape.text_frame.margin_left
-            mt = shape.text_frame.margin_top
-            mr = shape.text_frame.margin_right
-        return {
-            'x1': int(x1),
-            'x2': int(x2),
-            'y1': int(y1),
-            'y2': int(y2),
-            'width': int(width),
-            'left': int(left),
-            'top': int(top),
-            'height': int(height),
-        }
+    @staticmethod
+    def random_string(symbols=5):
+        return ''.join(random.choices(string.ascii_uppercase + string.digits, k=symbols))
 
 
 class CheckPresentationGetData(CheckPresentationUtils):
@@ -426,7 +428,6 @@ class CheckPresentationGetData(CheckPresentationUtils):
                         font_sizes.append(run.font.size.pt * font_scale / 100)
                 except AttributeError:
                     pass
-        #  https://github.com/scanny/python-pptx/issues/337
         if flag:
             if len(font_sizes) == 0:
                 font_sizes.append(18.0)
@@ -511,6 +512,28 @@ class CheckPresentationGetData(CheckPresentationUtils):
             font_sizes.update({slide_index: self.font_sizes_by_slide_id(slide.slide_id)})
         return font_sizes
 
+    @staticmethod
+    def get_typefaces_by_shape(shape):
+        """
+        Получает названия шрифта по shape презентации
+        :param shape: shape презентации
+        :type shape: class
+        :return: Строку с названием шрифта
+        :rtype: string
+        """
+        typeface = ""
+        for paragraph in shape.text_frame.paragraphs:
+            for run in paragraph.runs:
+                try:
+                    typeface = run.font.name
+                except AttributeError:
+                    pass
+        if typeface is None:
+            typeface = DEFAULT_FONT
+        if typeface == "+mn-lt":
+            typeface = DEFAULT_THEME_FONT
+        return typeface
+
     def get_typefaces(self):
         """
         :return typefaces: Уникальные название шрифта из презентации
@@ -522,6 +545,14 @@ class CheckPresentationGetData(CheckPresentationUtils):
                 typefaces.add(run.font.name)
             except AttributeError:
                 pass
+        typefaces = list(typefaces)
+        for i in range(len(typefaces)):  # На основе темы презентации по умолчанию
+            if typefaces[i] is None and DEFAULT_FONT not in typefaces:
+                typefaces[i] = DEFAULT_FONT
+            else:
+                typefaces[i] = DEFAULT_THEME_FONT
+            if typefaces[i] == "+mn-lt":
+                typefaces[i] = DEFAULT_THEME_FONT
         return typefaces
 
     def get_text(self):
@@ -547,11 +578,37 @@ class CheckPresentationGetData(CheckPresentationUtils):
         most_common = Counter(text_analyzed).most_common(5)
         return most_common
 
+    def dimensions_to_draw(self, shape):
+        """
+        Возвращает словарь измерений для обьекта презентации.
+        :param shape: shape презентации
+        :type shape: class
+        :return: Словарь изменений для обьекта презентаций содержащий ключи x1, y1, x2, y2, width, height
+        :rtype: dict string/int
+        """
+        width, height = self.convert_emu_px(shape.width), self.convert_emu_px(shape.height)
+        left, top = self.convert_emu_px(shape.left), self.convert_emu_px(shape.top)
+        x1, y1 = left, top
+        x2, y2 = width + x1, height + y1
+        return {
+            'x1': int(x1),
+            'x2': int(x2),
+            'y1': int(y1),
+            'y2': int(y2),
+            'width': int(width),
+            'left': int(left),
+            'top': int(top),
+            'height': int(height),
+        }
+
 
 class CheckPresentationAnalyze(CheckPresentationGetData):
     def image_overlaps(self):
         """
         Проверяет обьекты презентации на коллизии.
+        ================================================================================================================
+        WIP
+        ================================================================================================================
         :return: Список с строками вида "Коллизия между: обьект1 и обьект2 на номер_слайда слайде
         :rtype: list of string
         """
@@ -569,45 +626,6 @@ class CheckPresentationAnalyze(CheckPresentationGetData):
                 previous_dimensions = current_dimensions
                 previous_shape = shape
         return result
-
-    def image_overlaps_generate_image(self, flag=None):
-        """
-        Генерирует и удаляет показательные изображения коллизий.
-        :param flag: Список путей файлов которые необходимо удалить
-        :type flag: list of string
-        :return: список путей если флаг None, True в случае успешного удаления иначе
-        :rtype: list of string or boolean
-        """
-        if flag is None:
-            result = []
-            for slide in self.presentation.slides:
-                index = int(self.presentation.slides.index(slide) + 1)
-                im = Image.new(mode="RGB", size=self.prs_w_h())
-                draw = ImageDraw.Draw(im)
-                previous_dimensions = []
-                previous_shape = None
-                for shape in slide.shapes:
-                    dim = self.dimensions_to_draw(shape)
-                    current_dimensions = [dim['x1'], dim['y1'], dim['width'], dim['height']]
-                    image_color = "blue"
-                    text_color = "yellow"
-                    if len(previous_dimensions) > 0 and previous_shape is not None:
-                        if self.check_collision(current_dimensions, previous_dimensions):
-                            print(self.check_collision(current_dimensions, previous_dimensions), shape.name,
-                                  previous_shape.name)
-                    if self.is_text(shape):
-                        draw.rectangle([(dim['x1'], dim['y1']), (dim['x2'], dim['y2'])], fill=text_color, outline="red")
-                    if self.is_image(shape):
-                        draw.rectangle([(dim['x1'], dim['y1']), (dim['x2'], dim['y2'])], fill=image_color)
-                    previous_dimensions = current_dimensions
-                    previous_shape = shape
-                im.save(f'{index}.jpg')
-                result.append(f'{index}.jpg')
-            return result
-        else:
-            for f in flag:
-                os.mkdir(f)
-            return True
 
     def distorted_images(self):
         """
@@ -762,6 +780,47 @@ class CheckPresentationAnalyze(CheckPresentationGetData):
 
 
 class CheckPresentationImages(CheckPresentationGetData):
+    def generate_skeleton(self, flag=None):
+        """
+        Генерирует и удаляет показательные изображения коллизий.
+        :param flag: Список путей файлов которые необходимо удалить
+        :type flag: list of string
+        :return: список путей если флаг None, True в случае успешного удаления иначе
+        :rtype: list of string or boolean
+        """
+        if flag is None:
+            result = []
+            for slide in self.presentation.slides:
+                index = int(self.presentation.slides.index(slide) + 1)
+                im = Image.new(mode="RGB", size=self.prs_w_h())
+                draw = ImageDraw.Draw(im)
+                # previous_dimensions = []
+                # previous_shape = None
+                for shape in slide.shapes:
+                    dim = self.dimensions_to_draw(shape)
+                    if self.is_text(shape):
+                        dim = self.dimensions_based_on_font(shape)
+                    current_dimensions = [dim['x1'], dim['y1'], dim['width'], dim['height']]
+                    image_color = "blue"
+                    text_color = "yellow"
+                    # if len(previous_dimensions) > 0 and previous_shape is not None:
+                    # if self.check_collision(current_dimensions, previous_dimensions):
+                    # print(self.check_collision(current_dimensions, previous_dimensions), shape.name,
+                    # previous_shape.name)
+                    if self.is_text(shape):
+                        draw.rectangle([(dim['x1'], dim['y1']), (dim['x2'], dim['y2'])], fill=text_color, outline="red")
+                    if self.is_image(shape):
+                        draw.rectangle([(dim['x1'], dim['y1']), (dim['x2'], dim['y2'])], fill=image_color)
+                    # previous_dimensions = current_dimensions
+                    # previous_shape = shape
+                im.save(f'{index}.jpg')
+                result.append(f'{index}.jpg')
+            return result
+        else:
+            for f in flag:
+                os.mkdir(f)
+            return True
+
     def save_images(self):
         """
         :return: Пути к сохранённым картинкам и их координаты Top Left на слайде
@@ -779,7 +838,6 @@ class CheckPresentationImages(CheckPresentationGetData):
                         f"slide{slide_counter}_{picture_counter}_original.png",
                     ]
                     image_size = (self.convert_emu_px(shape.width), self.convert_emu_px(shape.height))
-                    print(image_size)
                     original_image = open(temp_image_paths[1], 'wb')
                     original_image.write(base64.b64decode(base64.b64encode(shape.image.blob)))
                     original_image.close()
@@ -789,45 +847,46 @@ class CheckPresentationImages(CheckPresentationGetData):
                     image_paths.append(temp_image_paths[0])
         return list(zip(image_paths, image_cords))
 
-    def generate_slide_images(self):
+    def generate_slide_images(self, bg="white", text_fill="black"):
         """
-        :return slide_images: Пути к сгенерированным картинкам слайдов.
-        :rtype slide_images: dict of (int, str)
+        Генерирует максимально точно возможные скриншоты слайдов не используя API PowerPoint. Используя убедитесь что
+        у пользователя есть доступ к папке C:\\Windows\\Fonts\\, и в том что установлены стандартные шрифты.
+        Изображения генерируются в папке с файлом.
+        :param bg: Желаемый цвет заднего фона
+        :type bg: string
+        :param text_fill: Желаемый цвет текста
+        :return: Список с путями к сохранённым фотографиям
+        :rtype: list of string
         """
-        presentation_images = self.save_images()
-        presentation_text = self.text_blocks()
-        size_of_presentation = self.prs_w_h()
-        images_on_slides = {
-            1: [(path[0], path[1]) for path in presentation_images if 'slide1' in path[0]],
-            2: [(path[0], path[1]) for path in presentation_images if 'slide2' in path[0]],
-            3: [(path[0], path[1]) for path in presentation_images if 'slide3' in path[0]],
-        }
-        slide_images = {}
-        for index in range(1, 4):
-            path_to_slide_image = f'slide{index}.png'
-            slide_image = Image.new("RGBA", size_of_presentation, "white")
-            # work with images #
-            for info_of_image in images_on_slides[index]:
-                slide_image.paste(Image.open(info_of_image[0]), info_of_image[1])
-                os.remove(info_of_image[0])
-            # end work with image #
-            # work with text #
-            for text_of_slide in presentation_text[index]:
-                left_top = text_of_slide[0]
-                width_height = text_of_slide[1]
-                font_size = int(min(text_of_slide[3]))
-                text_on_shape = text_of_slide[2]
-                text_image = Image.new('RGB', width_height, "white")
-                text_font = ImageFont.truetype('fonts/Arial.ttf', font_size)
-                wrapper = TextWrapper(text_on_shape, text_font, width_height[0])
-                wrapped_text = wrapper.wrapped_text()
-                draw_text = ImageDraw.Draw(text_image)
-                draw_text.text((0, 0), wrapped_text, font=text_font, fill=(0, 0, 0))
-                slide_image.paste(text_image, left_top)
-            # end work with text #
-            slide_image.save(path_to_slide_image)
-            slide_images[index] = path_to_slide_image
-        return slide_images
+        result = []
+        images = self.save_images()
+        prs_size = self.prs_w_h()
+        for slide in self.presentation.slides:
+            idx = self.presentation.slides.index(slide) + 1
+            slide_images = [(p[0], p[1]) for p in images if f'slide{idx}' in p[0]]  # p[0]: path ; p[1] width, height
+            screen = Image.new("RGBA", prs_size, bg)
+            for shape in slide.shapes:
+                if self.is_text(shape):
+                    dims = self.dimensions_to_draw(shape)
+                    typeface = self.get_typefaces_by_shape(shape).split(' ')[0].lower()
+                    font_size = int(max(self.font_sizes_by_shape(shape, True))) + 4
+                    try:
+                        font = ImageFont.truetype(font=f"C:/Windows/Fonts/{typeface}.ttf", size=font_size)
+                    except OSError:
+                        font = ImageFont.truetype(font=f"C:/Windows/Fonts/{DEFAULT_FONT.lower()}.ttf", size=font_size)
+                    wrap = TextWrapper(shape.text, font, dims['width'])
+                    text_image = Image.new("RGB", wrap.total_width_height(), bg)
+                    draw = ImageDraw.Draw(text_image)
+                    draw.text((0, 0), wrap.wrapped_text(), font=font, fill=text_fill)
+                    screen.paste(text_image, (dims['x1'], dims['y1']))
+                    # text_image.save(f'tmp/{self.random_string()}.jpg')
+                    # process images
+            for img in slide_images:
+                screen.paste(Image.open(img[0]), img[1])
+                os.remove(img[0])
+            screen.save(f'slide{idx}.png')
+            result.append(f'{os.getcwd()}\\slide{idx}.png')
+        return result
 
 
 class CheckPresentationPossibleWarnings(CheckPresentationGetData):
@@ -907,3 +966,29 @@ class CheckPresentationPossibleWarnings(CheckPresentationGetData):
         return result
 
 
+class CheckPresentationTesting(CheckPresentationImages):
+    def generate_slide_images(self):
+        if self.path_to_presentation is not None:
+            app = win32com.client.Dispatch("PowerPoint.Application")
+            prs = app.Presentations.Open(self.path_to_presentation, WithWindow=False)
+            directory = os.path.abspath(os.getcwd())
+            counter = 1
+            result = []
+            for s in prs.Slides:
+                path = f"{directory}\\slide_images\\slide_{counter}.jpg"
+                s.Export(path, "JPG")
+                result.append(path)
+                counter += 1
+            '''
+            Этот фрагмент показывает как я пытался починить рамки shape'оф программно. Безуспешно пока что.
+            for sld in prs.Slides:
+                for shp in sld.Shapes:
+                    if shp.HasTextFrame:
+                        if not shp.TextFrame.AutoSize == MSOPPT.constants.ppAutoSizeShapeToFitText:
+                            shp.TextFrame.WordWrap = MSO.constants.msoFalse
+                            shp.TextFrame.AutoSize = MSOPPT.constants.ppAutoSizeShapeToFitText
+                            shp.TextFrame.WordWrap = MSO.constants.msoTrue
+            prs.Save()
+            '''
+            return result
+        raise Exception("Не указан путь к презентации")
