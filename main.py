@@ -1,70 +1,107 @@
 # -*- coding: utf-8 -*-
 import os
 import argparse
-from CheckPresentationMain import CheckPresentationAnalyze, PrintTo, CheckPresentationGetData
-from pptx import Presentation
+from CheckPresentation.Main import Main
+from CheckPresentation.Print import Print
 
-def get_slides(file_pptx):
-    return CheckPresentationGetData(Presentation(file_pptx)).length()
-def get_result(file_pptx):
-    return CheckPresentationAnalyze(Presentation(file_pptx)).analyze_results()
+r'''
+Examples:
+print D:\Presentations\003.pptx D:\Presentations\003.txt txt write
+print D:\Presentations\003.pptx D:\Presentations\003.csv csv rewrite -e windows-1251
+
+images D:\Presentations\003.pptx powerpoint
+images D:\Presentations\003.pptx simple
+images D:\Presentations\003.pptx skeleton
+
+simple D:\Presentations\003.pptx -j
+simple D:\Presentations\003.pptx
+'''
 
 
-description = (
-    'Укажите путь к файлу'
-)
+def print_to_file(arguments):
+    main = Main(arguments.path_to_presentation)
+    result = main.Analyze.analyze()
+    if arguments.extension == "txt":
+        p = Print(result, arguments.path_to_out, arguments.path_to_presentation, encoding=arguments.encoding)
+        print(p.txt(mode=arguments.write_mode))
+    elif arguments.extension == "csv":
+        p = Print(result, arguments.path_to_out, arguments.path_to_presentation, encoding=arguments.encoding)
+        print(p.csv(mode=arguments.write_mode))
+
+
+def generate_images(arguments):
+    def print_result(res):
+        print("Пути к картинкам:")
+        for r in res:
+            print(r)
+
+    main = Main(arguments.path_to_presentation)
+    images = main.Images
+    if arguments.type == "powerpoint":
+        print_result(main.Testing.generate_slide_images())
+    elif arguments.type == "simple":
+        print_result(images.generate())
+    elif arguments.type == "skeleton":
+        print_result(images.generate_skeleton())
+    else:
+        return "Укажите верный тип генерации."
+
+
+def simple_result(arguments):
+    main = Main(arguments.path_to_presentation)
+    result = main.Analyze.analyze()
+    if arguments.json:
+        result = main.Utils.to_json(result)
+        print(result)
+        return
+    for r in result:
+        print(f"{r} => {result[r]}")
+
+
+def create_parser():
+    description = (
+        '© newfox79 https://github.com/newfox79/ \n'
+        'Приложение создано в помощь ученикам и экспертам в проверке задания 13.1 ОГЭ 2020. \n'
+        'Приложение предоставляется "As Is" без каких либо дополнительных гарантий, и всё ещё находится в стадии '
+        'активной разработки.\n'
+        'По любым вопросам или предложениям можно написать в почту lis@chaikovskie.com'
+    )
+    parser = argparse.ArgumentParser(description=description)
+    sub_parser = parser.add_subparsers()
+
+    parser_print = sub_parser.add_parser("print",
+                                         help="Укажите путь к презентации, путь к файлу в который необходимо выгрузить "
+                                              "результаты, его расширение, режим записи. Примеры:\n"
+                                              "ФАЙЛ_ПРЕЗЕНАТЦИИ -p C:/path/out.csv csv write | "
+                                              "ФАЙЛ_ПРЕЗЕНТАЦИИ -p C:/path/out.txt txt rewrite")
+    parser_print.add_argument("path_to_presentation", type=str, help="Путь к презентации формата ABSPATH")
+    parser_print.add_argument("path_to_out", type=str, help="Путь к файлу выгрузки результатов формата ABSPATH")
+    parser_print.add_argument("extension", type=str, help="Расширение файла выгрузки", choices=["txt", "csv"])
+    parser_print.add_argument("write_mode", type=str, help="Режим записи файла", choices=["write", "rewrite"])
+    parser_print.add_argument("-e", "--encoding", type=str, help="Кодировка файла выгрузки", default="utf-8")
+    parser_print.set_defaults(func=print_to_file)
+
+    parser_images = sub_parser.add_parser("images",
+                                          help="Укажите путь к презентации, каким способом генерировать картинки, "
+                                               "и вы получите абсолютные пути к сгенерированным картинкам")
+    parser_images.add_argument("path_to_presentation", type=str, help="Путь к презентации формата ABSPATH")
+    parser_images.add_argument("type", type=str, choices=["powerpoint", "simple", "skeleton"],
+                               help="Способ генерации картинок. powerpoint - самый точный, но требует установленного "
+                                    "powerpoint. simple - не точный, но быстрый, позволяет увидеть текст и картинки "
+                                    "на презентации. skeleton - позволяет увидеть расположение элементов на презентации,"
+                                    " синие прямоугольники: картинки, жёлтые: текст.")
+    parser_images.set_defaults(func=generate_images)
+
+    parser_simple = sub_parser.add_parser("simple",
+                                          help="Укажите путь к презентации, и получите результат проверки")
+    parser_simple.add_argument("path_to_presentation", type=str, help="Путь к презентации формата ABSPATH")
+    parser_simple.add_argument("-j", "--json", action="store_true", help="Если нужен результат в json")
+    parser_simple.set_defaults(func=simple_result)
+
+    parser = parser.parse_args()
+    return parser
+
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description=description)
-    parser.add_argument("-o", "--output",
-                        type=str,
-                        help="Путь к файлу в который необходимо выгрузить результаты."
-                        )
-    parser.add_argument("-e", "--encoding",
-                        type=str,
-                        help="Если необходимо указать кодировку содержимого файла. Поддерживается только формат .csv."
-                        )
-    parser.add_argument("-t", "--typeof",
-                        type=str,
-                        help="Тип(расширение) файла в который будет происходить выгрузка. Доступные: txt, csv.")
-    parser.add_argument("-m", "--mode",
-                        type=str,
-                        help="Как будет записываться файл? write - дописывание, rewrite - перезапись.")
-    parser.add_argument("presentation_file",
-                        type=str,
-                        help="Укажите путь к файлу презентации."
-                        )
-    args = parser.parse_args()
-    file = args.presentation_file
-    output = args.output
-    typeof = args.typeof
-    mode = args.mode
-    encoding = args.encoding
-    if file:
-        if all([output, typeof, mode]):
-            if encoding:
-                if typeof == 'csv':
-                    Print = PrintTo(get_result(file), output, file, encoding=encoding)
-                    to_file = Print.csv(mode)
-                    print(to_file)
-            else:
-                if typeof == 'csv':
-                    Print = PrintTo(get_result(file), output, file)
-                    to_file = Print.csv(mode)
-                    print(to_file)
-                elif typeof == 'txt':
-                    Print = PrintTo(get_result(file), output, file)
-                    to_file = Print.txt(mode)
-                    print(to_file)
-        else:
-            slides = get_slides(file_pptx=file)
-            if slides < 3 or slides > 4:
-                print(f'В презентации должно быть ровно 3 слайда. Найдено {slides}.')
-            result = get_result(file_pptx=file)
-            for res in result:
-                if res == 'Количество слайдов':
-                    print(f'{res} => {result[res]}')
-                else:
-                    print(f'{res} => {"Да" if result[res] else "Нет"}')
-
-
+    args = create_parser()
+    args.func(args)
