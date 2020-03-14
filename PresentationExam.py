@@ -1,4 +1,7 @@
 # coding: utf-8
+import os
+import shutil
+
 import win32com.client
 from PresentationExamUtils import PresentationExamUtils as Utils
 from PresentationExamAnalyze import PresentationExamAnalyze as Analyze
@@ -39,9 +42,13 @@ class PresentationExam(object):
         return self._Presentation.Save()
 
     def __del__(self):
+        if os.path.isdir(os.getcwd() + "\\temp\\"):
+            shutil.rmtree(os.getcwd() + "\\temp\\")
         self._Application.Quit()
 
     def __exit__(self):
+        if os.path.isdir(os.getcwd() + "\\temp\\"):
+            shutil.rmtree(os.getcwd() + "\\temp\\")
         self._Application.Quit()
 
 
