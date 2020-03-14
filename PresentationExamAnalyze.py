@@ -3,11 +3,12 @@ from MSOCONSTANTS import ppPlaceholderCenterTitle, ppPlaceholderTitle, ppPlaceho
 
 
 class PresentationExamAnalyze(object):
-    def __init__(self, presentation, application, utils):
+    def __init__(self, presentation, application, utils, images):
         super().__init__()
         self._Presentation = presentation
         self._Application = application
         self._Utils = utils
+        self._Images = images
         self._warnings = {
             'Предупреждения в первом слайде': [],
             'Предупреждения во втором слайде': [],
@@ -25,6 +26,7 @@ class PresentationExamAnalyze(object):
             'three_slides': False,
             'aspect_ratio': False,
             'orientation': False,
+            'original_photos': False,
         }
         if self._Presentation.PageSetup.SlideOrientation == msoOrientationHorizontal:
             result['orientation'] = True
@@ -46,6 +48,9 @@ class PresentationExamAnalyze(object):
         if shape_animations:
             self._warnings["Предупреждения по презентации"].append(
                 f"Найдены анимации в объектах: {shape_animations}.")
+        if self._Images.compare():
+            result['original_photos'] = True
+
         return result
 
     def __analyze_first_slide(self):
@@ -115,7 +120,7 @@ class PresentationExamAnalyze(object):
         pass
 
     def __summary(self):
-        pass
+        return self.__analyze_first_slide(), self.__analyze_presentation_slide_parameters()
 
     @property
     def analyze(self):
