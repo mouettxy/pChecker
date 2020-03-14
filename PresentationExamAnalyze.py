@@ -120,7 +120,7 @@ class PresentationExamAnalyze(object):
         pass
 
     def __summary(self):
-        return self.__analyze_first_slide(), self.__analyze_presentation_slide_parameters()
+        pass
 
     @property
     def analyze(self):
