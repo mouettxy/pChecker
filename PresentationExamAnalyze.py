@@ -1,5 +1,7 @@
 from MSOCONSTANTS import msoPlaceholder, msoOrientationHorizontal
 from MSOCONSTANTS import ppPlaceholderCenterTitle, ppPlaceholderTitle, ppPlaceholderSubtitle
+from PresentationExamLayouts import PresentationExamLayouts as Layouts
+import inspect
 
 
 class PresentationExamAnalyze(object):
