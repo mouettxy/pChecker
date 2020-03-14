@@ -11,6 +11,7 @@ class PresentationExamAnalyze(object):
         self._Application = application
         self._Utils = utils
         self._Images = images
+        self._layouts = inspect.getmembers(Layouts, predicate=inspect.isfunction)
         self._warnings = {
             'Предупреждения в первом слайде': [],
             'Предупреждения во втором слайде': [],
