@@ -1,5 +1,9 @@
 import os
+import shutil
+
 from PIL import ImageDraw, Image
+import imagehash
+from MSOCONSTANTS import ppShapeFormatJPG
 
 
 class PresentationExamImages(object):
@@ -46,6 +50,38 @@ class PresentationExamImages(object):
         if return_bool is True:
             return True
 
+    def __get_original_images_from_presentation(self, return_path=False, return_bool=False):
+        if not os.path.exists('shapes_images'):
+            os.mkdir('shapes_images')
+        counter = 0
+        for Slide in self._Presentation.Slides:
+            for Shape in Slide.Shapes:
+                if self._Utils.is_image(Shape):
+                    counter += 1
+                    path = os.getcwd() + f"\\shapes_images\\picture_{counter}.jpg"
+                    Shape.Export(path, ppShapeFormatJPG)
+                    if return_path:
+                        yield path
+        if return_bool:
+            return True
+
+    def __compare_images(self):
+        path_to_shape_images = list(self.__get_original_images_from_presentation(return_path=True))
+        compare_images_counter = 0
+        for original_image_name in os.listdir(os.getcwd() + "\\original_images\\"):
+            for shape_image_path in path_to_shape_images:
+                original_image = Image.open(os.getcwd() + "\\original_images\\" + original_image_name)
+                shape_image = Image.open(shape_image_path)
+                if imagehash.average_hash(original_image) == imagehash.average_hash(shape_image):
+                    compare_images_counter += 1
+                    break
+        else:
+            if len(path_to_shape_images) == compare_images_counter:
+                shutil.rmtree(os.getcwd() + "\\shapes_images\\")
+                return True
+            shutil.rmtree(os.getcwd() + "\\shapes_images\\")
+            return False
+
     def __generate_images_screenshots(self, return_path=False, return_bool=False):
         if not os.path.exists('temp'):
             os.mkdir('temp')
@@ -57,8 +93,14 @@ class PresentationExamImages(object):
         if return_bool:
             return True
 
+    def compare(self):
+        if os.listdir(os.getcwd() + "\\original_images\\"):
+            return self.__compare_images()
+        else:
+            return "Не загружены изображения."
+
     def get(self, typeof="exact", return_path=True):
-        if typeof == "exact":
+        if typeof == "exact_match":
             if return_path:
                 return list(self.__generate_images_screenshots(return_path=True))
             else:
