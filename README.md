@@ -2,7 +2,7 @@ rewrite program to use Office API instead of python-pptx module
 
 # Current features
 
-## Images
+### Images
 
 * generating screenshots of each slide
 * generating "skeleton" of each slide (it contains position of each element)
