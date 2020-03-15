@@ -29,7 +29,10 @@ class PresentationExamAnalyze(object):
             'three_slides': False,
             'aspect_ratio': False,
             'orientation': False,
+            'typefaces': False,
             'original_photos': False,
+            'contains_layout': False,
+            'which_layout': None,
         }
         if self._Presentation.PageSetup.SlideOrientation == msoOrientationHorizontal:
             result['orientation'] = True
@@ -51,8 +54,43 @@ class PresentationExamAnalyze(object):
         if shape_animations:
             self._warnings["Предупреждения по презентации"].append(
                 f"Найдены анимации в объектах: {shape_animations}.")
+
         if self._Images.compare():
             result['original_photos'] = True
+
+        # layout check
+        for layout in self._layouts:
+            layout_name = layout[0]
+            layout_dimensions = layout[1](self._Utils.convert_points_px(self._Presentation.PageSetup.SlideWidth),
+                                          self._Utils.convert_points_px(self._Presentation.PageSetup.SlideHeight))
+            rectangles = []
+            all_objects, objects_with_collision = set(), set()
+            for Slide in self._Presentation.Slides:
+                if Slide.SlideIndex == 2 or Slide.SlideIndex == 3:
+                    for Shape in Slide.Shapes:
+                        all_objects.add(Shape.Name)
+                        shape_dimensions = self._Utils.get_shape_dimensions(Shape)
+                        if self._Utils.is_text(Shape):
+                            rectangles = layout_dimensions[Slide.SlideIndex]['text_blocks']
+                        elif self._Utils.is_image(Shape):
+                            rectangles = layout_dimensions[Slide.SlideIndex]['images']
+                        for r in rectangles:
+                            rectangle_dimensions = {'left': r[0], 'top': r[1], 'width': r[2], 'height': r[3]}
+                            if self._Utils.check_collision_between_shapes(shape_dimensions,
+                                                                          rectangle_dimensions):
+                                objects_with_collision.add(Shape.Name)
+            if len(all_objects) == len(objects_with_collision):
+                result['contains_layout'] = True
+                result['which_layout'] = layout_name
+
+        # typefaces
+        for Slide in self._Presentation.Slides:
+            for Shape in Slide.Shapes:
+                if self._Utils.is_text(Shape):
+                    self._typefaces.add(Shape.TextFrame.TextRange.Font.Name)
+
+        if len(self._typefaces) == 1:
+            result['typefaces'] = True
 
         return result
 
@@ -123,7 +161,7 @@ class PresentationExamAnalyze(object):
         pass
 
     def __summary(self):
-        pass
+        return self.__analyze_presentation_slide_parameters()
 
     @property
     def analyze(self):
