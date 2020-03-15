@@ -22,7 +22,7 @@ class PresentationExamUtils(object):
 
     @staticmethod
     def is_image(Shape):
-        if Shape.Type == msoPicture or Shape.Type == msoLinkedPicture or Shape.Type == msoAutoShape:
+        if Shape.Type == msoPicture or Shape.Type == msoLinkedPicture:
             return True
         if Shape.Type == msoPlaceholder:
             if Shape.PlaceholderFormat.Type == ppPlaceholderPicture:
