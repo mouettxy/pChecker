@@ -10,6 +10,7 @@ from MSOCONSTANTS import ppShapeFormatJPG
 from PresentationExamLayouts import PresentationExamLayouts as Layouts
 import inspect
 
+
 class PresentationExamImages(object):
     def __init__(self, presentation, utils):
         super().__init__()
@@ -106,9 +107,15 @@ class PresentationExamImages(object):
                 shape_image = Image.open(shape_image_path)
                 if imagehash.average_hash(original_image) == imagehash.average_hash(shape_image):
                     compare_images_counter += 1
+                    path_to_shape_images.remove(shape_image_path)
+                    break
+                elif imagehash.average_hash(shape_image) - imagehash.average_hash(original_image) <= 10:
+                    compare_images_counter += 1
+                    path_to_shape_images.remove(shape_image_path)
                     break
         else:
-            if len(path_to_shape_images) == compare_images_counter:
+            #print(path_to_shape_images)
+            if len(path_to_shape_images) <= 2:
                 shutil.rmtree(os.getcwd() + "\\shapes_images\\")
                 return True
             shutil.rmtree(os.getcwd() + "\\shapes_images\\")
