@@ -23,7 +23,7 @@ class PresentationExamLayouts(object):
                 'text_blocks': [(width/2, 0, width/2, height), (0, 0, width, height/4)]
             },
             3: {
-                'images': [(0, 0, width/3, height/2), (width/3, height/2, width/3, height/2),
+                'images': [(0, 0, width/3, height/2), (width/3, height/2, width/3+width/3, height/2),
                            (width/3*2, 0, width/3, height/2)],
                 'text_blocks': [(0, height/2, width/3, height/2), (width/3, 0, width/3, height/2),
                                 (width/3*2, height/2, width/3, height/2), (0, 0, width, height/4)],
