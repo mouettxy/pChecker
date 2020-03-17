@@ -1,4 +1,5 @@
 from MSOCONSTANTS import msoTrue, msoPicture, msoLinkedPicture, msoAutoShape, msoPlaceholder
+from MSOCONSTANTS import ppPlaceholderCenterTitle, ppPlaceholderTitle, ppPlaceholderSubtitle
 from MSOCONSTANTS import ppPlaceholderPicture
 
 
@@ -26,6 +27,15 @@ class PresentationExamUtils(object):
             return True
         if Shape.Type == msoPlaceholder:
             if Shape.PlaceholderFormat.Type == ppPlaceholderPicture:
+                return True
+        return False
+
+    @staticmethod
+    def is_title(Shape):
+        if Shape.Type == msoPlaceholder:
+            if (Shape.PlaceholderFormat.Type == ppPlaceholderCenterTitle or
+                    Shape.PlaceholderFormat.Type == ppPlaceholderSubtitle or
+                    Shape.PlaceholderFormat.Type == ppPlaceholderTitle):
                 return True
         return False
 
