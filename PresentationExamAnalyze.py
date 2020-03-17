@@ -20,10 +20,6 @@ class PresentationExamAnalyze(object):
         }
         self._typefaces = set()
 
-    @property
-    def warnings(self):
-        return self._warnings
-
     def __analyze_presentation_slide_parameters(self):
         result = {
             'three_slides': False,
@@ -99,11 +95,16 @@ class PresentationExamAnalyze(object):
         result = {
             "has_title": False,
             "has_subtitle": False,
+            "shapes_overlaps": True,
             "correct_font_size": False
         }
-        font_sizes = []
-        reserve_object_counter = 0
+        font_sizes, reserve_object_counter, previous_shape, shape_overlaps = [], 0, None, set()
         for Shape in Slide.Shapes:
+            shape_dimensions = self._Utils.get_shape_dimensions(Shape)
+            if previous_shape is None:
+                previous_shape = shape_dimensions
+            elif previous_shape is not None:
+                shape_overlaps.add(self._Utils.check_collision_between_shapes(shape_dimensions, previous_shape))
             # generate warning if first shape has images
             if self._Utils.is_image(Shape):
                 self._warnings['Предупреждения в первом слайде'].append(f"Изображение {Shape.Name} с ID {Shape.Id}")
@@ -152,6 +153,10 @@ class PresentationExamAnalyze(object):
                 result['correct_font_size'] = True
         else:
             self._warnings['Предупреждения в первом слайде'].append(f"Больше двух текстовых элементов на слайде.")
+
+        if not len(shape_overlaps) > 1:
+            result['shapes_overlaps'] = False
+
         return result
 
     def __analyze_second_slide(self):
@@ -160,8 +165,9 @@ class PresentationExamAnalyze(object):
     def __analyze_third_slide(self):
         pass
 
-    def __summary(self):
-        return self.__analyze_presentation_slide_parameters()
+    @property
+    def warnings(self):
+        return self._warnings
 
     @property
     def analyze(self):
