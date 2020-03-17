@@ -159,6 +159,29 @@ class PresentationExamAnalyze(object):
 
         return result
 
+    def __base_slide_analyze(self, slide):
+        title, text_blocks, images, font_sizes, previous_shape, shape_overlaps = False, 0, 0, [], None, set()
+        for Shape in self._Presentation.Slides(slide).Shapes:
+            shape_dimensions = self._Utils.get_shape_dimensions(Shape)
+            if previous_shape is None:
+                previous_shape = shape_dimensions
+            elif previous_shape is not None:
+                shape_overlaps.add(self._Utils.check_collision_between_shapes(shape_dimensions, previous_shape))
+            if self._Utils.is_text(Shape) is True:
+                if self._Utils.is_title(Shape):
+                    if not title:
+                        title = True
+                font_sizes.append(Shape.TextFrame.TextRange.Font.Size)
+                text_blocks += 1
+            elif self._Utils.is_text(Shape) is None:
+                self._warnings['Предупреждения во втором слайде'].append(
+                    f"Пустой текстовый блок {Shape.Name} с ID {Shape.Id}"
+                )
+            else:
+                if self._Utils.is_image(Shape):
+                    images += 1
+        return title, text_blocks, images, font_sizes, shape_overlaps
+
     def __analyze_second_slide(self):
         pass
 
