@@ -41,10 +41,10 @@ class PresentationExamUtils(object):
 
     @staticmethod
     def check_collision_between_shapes(first_shape, second_shape):
-        if (first_shape['left'] + first_shape['width'] >= second_shape['left'] and
-                first_shape['left'] <= second_shape['left'] + second_shape['width'] and
-                first_shape['top'] + first_shape['height'] >= second_shape['top'] and
-                first_shape['top'] <= second_shape['top'] + second_shape['height']):
+        if (first_shape['left'] + first_shape['width'] > second_shape['left'] and
+                first_shape['left'] < second_shape['left'] + second_shape['width'] and
+                first_shape['top'] + first_shape['height'] > second_shape['top'] and
+                first_shape['top'] < second_shape['top'] + second_shape['height']):
             return True
         return False
 
@@ -64,10 +64,13 @@ class PresentationExamUtils(object):
                 else:
                     Range = Shape.TextFrame.TextRange
                     TextFrame = Shape.TextFrame
-                    shape_t = self.convert_points_px(Range.BoundTop) - self.convert_points_px(TextFrame.MarginTop)
-                    shape_l = self.convert_points_px(Range.BoundLeft) - self.convert_points_px(TextFrame.MarginLeft)
-                    shape_w = self.convert_points_px(Range.BoundWidth) - self.convert_points_px(TextFrame.MarginRight)
-                    shape_h = self.convert_points_px(Range.BoundHeight) - self.convert_points_px(TextFrame.MarginBottom)
+                    # int 7 that is experimental average value
+                    shape_t = self.convert_points_px(Range.BoundTop) - self.convert_points_px(TextFrame.MarginTop) + 7
+                    shape_l = self.convert_points_px(Range.BoundLeft) - self.convert_points_px(TextFrame.MarginLeft) + 7
+                    shape_w = self.convert_points_px(Range.BoundWidth) - self.convert_points_px(
+                        TextFrame.MarginRight) - 7
+                    shape_h = self.convert_points_px(Range.BoundHeight) - self.convert_points_px(
+                        TextFrame.MarginBottom) - 7
                     # undo all what we deleted, because for some reason, this changes saved in presentation
                     for i in range(movement_counter):
                         self._Application.StartNewUndoEntry()
