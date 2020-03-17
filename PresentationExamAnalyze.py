@@ -183,10 +183,145 @@ class PresentationExamAnalyze(object):
         return title, text_blocks, images, font_sizes, shape_overlaps
 
     def __analyze_second_slide(self):
-        pass
+        result = {
+            "has_title": False,
+            "has_text_blocks": False,
+            "has_images": False,
+            "shapes_overlaps": True,
+            "correct_font_size": False,
+        }
+
+        result['has_title'], text_blocks, images, font_sizes, shape_overlaps = self.__base_slide_analyze(2)
+
+        if text_blocks == 2 and result['has_title']:
+            result['has_text_blocks'] = True
+        elif text_blocks == 3 and not result['has_title']:
+            result['has_text_blocks'] = True
+        elif text_blocks == 2 and not result['has_title']:
+            result['has_text_blocks'] = True
+            # play it safe
+            result['has_title'] = False
+        else:
+            result['has_text_blocks'], result['has_title'] = False, False
+
+        if images == 2:
+            result['has_images'] = True
+
+        if 20.0 in font_sizes and not result['has_title']:
+            result['correct_font_size'] = True
+        elif 20.0 in font_sizes and 24.0 in font_sizes and result['has_title']:
+            result['correct_font_size'] = True
+
+        if not len(shape_overlaps) > 1:
+            result['shapes_overlaps'] = False
+
+        return result
 
     def __analyze_third_slide(self):
-        pass
+        result = {
+            "has_title": False,
+            "has_text_blocks": False,
+            "has_images": False,
+            "shapes_overlaps": True,
+            "correct_font_size": False,
+        }
+
+        result['has_title'], text_blocks, images, font_sizes, shape_overlaps = self.__base_slide_analyze(3)
+
+        if text_blocks == 3 and result['has_title']:
+            result['has_text_blocks'] = True
+        elif text_blocks == 4 and not result['has_title']:
+            result['has_text_blocks'] = True
+        elif text_blocks == 3 and not result['has_title']:
+            result['has_text_blocks'] = True
+            # play it safe
+            result['has_title'] = False
+        else:
+            result['has_text_blocks'], result['has_title'] = False, False
+
+        if images == 3:
+            result['has_images'] = True
+
+        if 20.0 in font_sizes and not result['has_title']:
+            result['correct_font_size'] = True
+        elif 20.0 in font_sizes and 24.0 in font_sizes and result['has_title']:
+            result['correct_font_size'] = True
+
+        if not len(shape_overlaps) > 1:
+            result['shapes_overlaps'] = False
+
+        return result
+
+    def __summary(self, how="in detail", grade=False):
+        """
+        :param how: in detail / minimal / only errors
+        :type how: string
+        :return:
+        """
+        data = {
+            'average': self.__analyze_presentation_slide_parameters(),
+            'first': self.__analyze_first_slide(),
+            'second': self.__analyze_second_slide(),
+        }
+
+        if data['average']['three_slides']:
+            data['third'] = self.__analyze_third_slide(),
+
+        if how == "in detail":
+            result = {
+                "Презентация": {
+                    "Слайды 16:9": "Не выполнено.",
+                    "Горизонтальная ориентация": "Не выполнено.",
+                },
+                "Структура": {
+                    "Презентация состоит ровно из трёх слайдов": "Не выполнено.",
+                    "Информация на слайдах размещена согласно макету": "Не выполнено.",
+                    "2 и 3 слайды имеют заголовки": "Не выполнено",
+                    "Элементы презентации не перекрывают друг друга": "Не выполнено.",
+                },
+                "Шрифт": {
+                    "Единый тип шрифта": "Не выполнено.",
+                    "Правильный размер шрифта": "Не выполнено.",
+                },
+                "Изображения": {
+                    "Сохранены пропорции при масштабировании": "Не выполнено.",
+                    "Соответствуют данным в задании изображениям": "Не выполнено.",
+                }
+            }
+            if 'third' in data:
+                if data['average']['three_slides']:
+                    result['Структура']['Презентация состоит ровно из трёх слайдов'] = "Выполнено."
+                if data['average']['contains_layout']:
+                    result['Структура']['Информация на слайдах размещена согласно макету'] = "Выполнено."
+                if all((data['second']['has_title'], data['third']['has_title'])):
+                    result['Структура']['2 и 3 слайды имеют заголовки'] = "Выполнено."
+                if not any((data['first']['shapes_overlaps'],
+                            data['second']['shapes_overlaps'],
+                            data['third']['shapes_overlaps'])):
+                    result['Структура']['Элементы презентации не перекрывают друг друга'] = "Выполнено."
+
+                if data['average']['typefaces']:
+                    result['Шрифт']['Единый тип шрифта'] = "Выполнено."
+                if all((data['first']['correct_font_size'],
+                        data['second']['correct_font_size'],
+                        data['third']['correct_font_size'])):
+                    result['Шрифт']['Правильный размер шрифта'] = "Выполнено."
+
+                # saved for future use
+                # if data['average']['images_aspect_ratio']:
+                #     result['Изображения']['Сохранены пропорции при масштабировании'] = "Выполнено."
+
+                if data['average']['original_photos']:
+                    result['Изображения']['Соответствуют данным в задании изображениям'] = "Выполнено."
+            else:
+                pass  # add case that presentation has 2 or >4 slides
+
+            return result
+
+        elif how == "minimal":
+            pass
+        elif how == "only errors":
+            pass
 
     @property
     def warnings(self):
