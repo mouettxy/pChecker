@@ -48,6 +48,19 @@ class PresentationExamUtils(object):
             return True
         return False
 
+    @staticmethod
+    def dict_to_list(dictionary, key=None):
+        if key is None:
+            for d in dictionary:
+                if type(dictionary[d]) == dict:
+                    for d2 in dictionary[d]:
+                        yield dictionary[d][d2]
+                else:
+                    yield dictionary[d]
+        else:
+            for d in dictionary[key]:
+                yield dictionary[key][d]
+
     def get_shape_dimensions(self, Shape):
         if Shape.HasTextFrame:
             if Shape.TextFrame.HasText:
