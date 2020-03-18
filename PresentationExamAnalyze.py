@@ -252,9 +252,9 @@ class PresentationExamAnalyze(object):
 
         return result
 
-    def __summary(self, how="in detail", grade=False):
+    def __summary(self, how="detail"):
         """
-        :param how: in detail / minimal / only errors
+        :param how: detail / minimal / errors
         :type how: string
         :return:
         """
@@ -263,70 +263,104 @@ class PresentationExamAnalyze(object):
             'first': self.__analyze_first_slide(),
             'second': self.__analyze_second_slide(),
         }
+        detail_result = {
+            "Презентация": {
+                "Слайды 16:9": "Не выполнено.",
+                "Горизонтальная ориентация": "Не выполнено.",
+            },
+            "Структура": {
+                "Презентация состоит ровно из трёх слайдов": "Не выполнено.",
+                "Информация на слайдах размещена согласно макету": "Не выполнено.",
+                "2 и 3 слайды имеют заголовки": "Не выполнено.",
+                "Элементы презентации не перекрывают друг друга": "Не выполнено.",
+            },
+            "Шрифт": {
+                "Единый тип шрифта": "Не выполнено.",
+                "Правильный размер шрифта": "Не выполнено.",
+            },
+            "Изображения": {
+                "Сохранены пропорции при масштабировании": "Не выполнено.",
+                "Соответствуют данным в задании изображениям": "Не выполнено.",
+            }
+        }
 
         if data['average']['three_slides']:
-            data['third'] = self.__analyze_third_slide(),
+            data['third'] = self.__analyze_third_slide()
 
-        if how == "in detail":
-            result = {
-                "Презентация": {
-                    "Слайды 16:9": "Не выполнено.",
-                    "Горизонтальная ориентация": "Не выполнено.",
-                },
-                "Структура": {
-                    "Презентация состоит ровно из трёх слайдов": "Не выполнено.",
-                    "Информация на слайдах размещена согласно макету": "Не выполнено.",
-                    "2 и 3 слайды имеют заголовки": "Не выполнено",
-                    "Элементы презентации не перекрывают друг друга": "Не выполнено.",
-                },
-                "Шрифт": {
-                    "Единый тип шрифта": "Не выполнено.",
-                    "Правильный размер шрифта": "Не выполнено.",
-                },
-                "Изображения": {
-                    "Сохранены пропорции при масштабировании": "Не выполнено.",
-                    "Соответствуют данным в задании изображениям": "Не выполнено.",
-                }
-            }
-            if 'third' in data:
-                if data['average']['three_slides']:
-                    result['Структура']['Презентация состоит ровно из трёх слайдов'] = "Выполнено."
-                if data['average']['contains_layout']:
-                    result['Структура']['Информация на слайдах размещена согласно макету'] = "Выполнено."
-                if all((data['second']['has_title'], data['third']['has_title'])):
-                    result['Структура']['2 и 3 слайды имеют заголовки'] = "Выполнено."
-                if not any((data['first']['shapes_overlaps'],
-                            data['second']['shapes_overlaps'],
-                            data['third']['shapes_overlaps'])):
-                    result['Структура']['Элементы презентации не перекрывают друг друга'] = "Выполнено."
+        if how == "detail":
+            detail_result['Структура']['Презентация состоит ровно из трёх слайдов'] = "Выполнено."
+            if data['average']['aspect_ratio']:
+                detail_result['Презентация']['Горизонтальная ориентация'] = "Выполнено."
+            if data['average']['orientation']:
+                detail_result['Презентация']['Слайды 16:9'] = "Выполнено."
+            if data['average']['contains_layout']:
+                detail_result['Структура']['Информация на слайдах размещена согласно макету'] = "Выполнено."
+            if data['average']['typefaces']:
+                detail_result['Шрифт']['Единый тип шрифта'] = "Выполнено."
+            # saved for future use
+            # if data['average']['images_aspect_ratio']:
+            #     result['Изображения']['Сохранены пропорции при масштабировании'] = "Выполнено."
+            if data['average']['original_photos']:
+                detail_result['Изображения']['Соответствуют данным в задании изображениям'] = "Выполнено."
 
-                if data['average']['typefaces']:
-                    result['Шрифт']['Единый тип шрифта'] = "Выполнено."
-                if all((data['first']['correct_font_size'],
-                        data['second']['correct_font_size'],
-                        data['third']['correct_font_size'])):
-                    result['Шрифт']['Правильный размер шрифта'] = "Выполнено."
-
-                # saved for future use
-                # if data['average']['images_aspect_ratio']:
-                #     result['Изображения']['Сохранены пропорции при масштабировании'] = "Выполнено."
-
-                if data['average']['original_photos']:
-                    result['Изображения']['Соответствуют данным в задании изображениям'] = "Выполнено."
+            if data['average']['three_slides']:
+                detail_result['Структура']['Презентация состоит ровно из трёх слайдов'] = "Выполнено."
+                if data['second']['has_title'] and data['third']['has_title']:
+                    detail_result['Структура']['2 и 3 слайды имеют заголовки'] = "Выполнено."
+                if (not data['first']['shapes_overlaps'] or
+                        not data['second']['shapes_overlaps'] or
+                        not data['third']['shapes_overlaps']):
+                    detail_result['Структура']['Элементы презентации не перекрывают друг друга'] = "Выполнено."
+                if (data['first']['correct_font_size'] and
+                        data['second']['correct_font_size'] and
+                        data['third']['correct_font_size']):
+                    detail_result['Шрифт']['Правильный размер шрифта'] = "Выполнено."
             else:
-                pass  # add case that presentation has 2 or >4 slides
+                detail_result['Структура']['Презентация состоит ровно из трёх слайдов'] = "Не выполнено."
+                if data['second']['has_title']:
+                    detail_result['Структура']['2 и 3 слайды имеют заголовки'] = "Выполнено."
+                if (not data['first']['shapes_overlaps'] or
+                        not data['second']['shapes_overlaps']):
+                    detail_result['Структура']['Элементы презентации не перекрывают друг друга'] = "Выполнено."
+                if (data['first']['correct_font_size'] and
+                        data['second']['correct_font_size']):
+                    detail_result['Шрифт']['Правильный размер шрифта'] = "Выполнено."
 
-            return result
+            # process grade
+            result_grade = 0
+            # if all criteria is true we give max grade and leave
+            if list(self._Utils.dict_to_list(detail_result)).count("Не выполнено.") == 0:
+                result_grade = 2
+                return detail_result, result_grade
 
+            # check if we can give grade 1
+            structure_c = list(self._Utils.dict_to_list(detail_result, "Структура")).count("Не выполнено.")
+            font_c = list(self._Utils.dict_to_list(detail_result, "Шрифт")).count("Не выполнено.")
+            images_c = list(self._Utils.dict_to_list(detail_result, "Изображения")).count("Не выполнено.")
+            if data['average']['three_slides']:
+                if structure_c == 1 and font_c == 0 and images_c == 0:
+                    result_grade = 1
+                elif structure_c == 0 and font_c == 1 and images_c == 1:
+                    result_grade = 1
+                elif structure_c == 0 and font_c == 0 and images_c == 1:
+                    result_grade = 1
+                return detail_result, result_grade
+            else:
+                if (self._Presentation.Slides.Count == 2 and
+                        structure_c == 0 and font_c == 0 and images_c == 0 and
+                        data['average']['contains_layout']):
+                    result_grade = 1
+            return detail_result, result_grade
         elif how == "minimal":
             pass
-        elif how == "only errors":
+        elif how == "errors":
             pass
+        else:
+            return "Не заявленный метод получения результата."
 
     @property
     def warnings(self):
         return self._warnings
 
-    @property
-    def analyze(self):
-        return self.__summary()
+    def get(self, how="detail"):
+        return self.__summary(how=how)
