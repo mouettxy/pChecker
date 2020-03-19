@@ -113,20 +113,21 @@ class PresentationExamImages(object):
                 c += 1
                 yield save_path
 
-    def __compare_images(self, directory="original_images"):
+    def __compare_images(self, directory="original_images", directory_to_delete="original_images_presentation"):
         path_to_shape_images = list(self.__save_original_images_presentation())
         compare_images_counter = 0
         for original_image_name in os.listdir(os.path.abspath(directory)):
             for shape_image_path in path_to_shape_images:
                 original_image = Image.open(os.path.abspath(f"{directory}/{original_image_name}"))
                 shape_image = Image.open(shape_image_path)
-                print(imagehash.average_hash(original_image), imagehash.average_hash(shape_image))
                 if imagehash.average_hash(original_image) == imagehash.average_hash(shape_image):
                     compare_images_counter += 1
                     break
         else:
-            if len(path_to_shape_images) <= 2:
+            if len(path_to_shape_images) == compare_images_counter:
+                shutil.rmtree(os.path.abspath(directory_to_delete))
                 return True
+            shutil.rmtree(os.path.abspath(directory_to_delete))
             return False
 
     def __generate_images_screenshots(self, return_path=False, return_bool=False, directory="temp"):
@@ -156,8 +157,8 @@ class PresentationExamImages(object):
                         return True
         return False
 
-    def compare(self, directory="original_images"):
-        if os.path.exists(os.path.abspath(directory)):
+    def compare(self):
+        if os.path.exists(os.path.abspath("original_images")):
             return self.__compare_images()
         else:
             return "Не загружены изображения."
@@ -177,3 +178,17 @@ class PresentationExamImages(object):
             return self.__generate_images_layout(lt)
         else:
             return "Mismatched type of generation"
+
+    @staticmethod
+    def upload_images(from_directory):
+        if os.path.isdir(from_directory):
+            if not os.path.exists(os.path.abspath('original_images')):
+                os.mkdir('original_images')
+            for filename in os.listdir(from_directory):
+                if (os.path.splitext(filename)[-1] == ".jpg" or
+                        os.path.splitext(filename)[-1] == ".jpeg" or
+                        os.path.splitext(filename)[-1] == ".png"):
+                    path = os.path.join(from_directory, filename)
+                    shutil.copy(path, os.path.abspath('original_images'), follow_symlinks=True)
+            return True
+        return False  # TODO generate expression here
