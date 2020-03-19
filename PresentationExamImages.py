@@ -146,7 +146,12 @@ class PresentationExamImages(object):
         shape_width, shape_height = Shape.Width, Shape.Height
         Shape.ScaleWidth(1, msoTrue)
         Shape.ScaleHeight(1, msoTrue)
-        return round(shape_width / Shape.Width * 100), round(shape_height / Shape.Height * 100)
+        original_w, original_h = round(shape_width / Shape.Width * 100), round(shape_height / Shape.Height * 100)
+        # rollback
+        print(original_w)
+        Shape.ScaleWidth(original_w / 100, msoTrue)
+        Shape.ScaleHeight(original_h / 100, msoTrue)
+        return original_w, original_h
 
     def distorted_images(self):
         for Slide in self._Presentation.Slides:
