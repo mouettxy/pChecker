@@ -1,14 +1,14 @@
+import inspect
 import os
 import shutil
 
-from PIL import ImageDraw, Image
 import cv2
-import numpy as np
 import imagehash
-from MSOCONSTANTS import ppShapeFormatJPG
+import numpy as np
+from PIL import ImageDraw, Image
 
+from MSOCONSTANTS import ppShapeFormatJPG, msoTrue
 from PresentationExamLayouts import PresentationExamLayouts as Layouts
-import inspect
 
 
 class PresentationExamImages(object):
@@ -132,8 +132,24 @@ class PresentationExamImages(object):
         if return_bool:
             return True
 
+    @staticmethod
+    def __get_shape_percentage_width_height(Shape):
+        shape_width, shape_height = Shape.Width, Shape.Height
+        Shape.ScaleWidth(1, msoTrue)
+        Shape.ScaleHeight(1, msoTrue)
+        return round(shape_width / Shape.Width * 100), round(shape_height / Shape.Height * 100)
+
+    def distorted_images(self):
+        for Slide in self._Presentation.Slides:
+            for Shape in Slide.Shapes:
+                if not self._Utils.is_text(Shape):
+                    w, h = self.__get_shape_percentage_width_height(Shape)
+                    if abs(w - h) > 10:
+                        return True
+        return False
+
     def compare(self):
-        if os.listdir(os.getcwd() + "\\original_images\\"):
+        if os.path.exists(os.getcwd() + "\\original_images\\"):
             return self.__compare_images()
         else:
             return "Не загружены изображения."
