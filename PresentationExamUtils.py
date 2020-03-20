@@ -1,6 +1,6 @@
-from MSOCONSTANTS import msoTrue, msoPicture, msoLinkedPicture, msoAutoShape, msoPlaceholder
+from MSOCONSTANTS import msoTrue, msoPicture, msoLinkedPicture, msoPlaceholder
 from MSOCONSTANTS import ppPlaceholderCenterTitle, ppPlaceholderTitle, ppPlaceholderSubtitle
-from MSOCONSTANTS import ppPlaceholderPicture
+from MSOCONSTANTS import ppPlaceholderPicture, msoScaleFromTopLeft
 
 
 class PresentationExamUtils(object):
@@ -99,3 +99,29 @@ class PresentationExamUtils(object):
             'width': self.convert_points_px(Shape.Width),
             'height': self.convert_points_px(Shape.Height),
         }
+
+    def get_shape_crop_values(self, Shape):
+        if not self.is_text(Shape):
+            return {
+                'left': self.convert_points_px(Shape.PictureFormat.CropLeft),
+                'top': self.convert_points_px(Shape.PictureFormat.CropTop),
+                'right': self.convert_points_px(Shape.PictureFormat.CropRight),
+                'bottom': self.convert_points_px(Shape.PictureFormat.CropBottom),
+            }
+        else:
+            return {'left': 0, 'top': 0, 'right': 0, 'bottom': 0}
+
+    @staticmethod
+    def get_shape_percentage_width_height(Shape, original_w_h=False):
+        shape_width, shape_height = Shape.Width, Shape.Height
+        Shape.ScaleWidth(1, msoTrue, msoScaleFromTopLeft)
+        Shape.ScaleHeight(1, msoTrue, msoScaleFromTopLeft)
+        original_width, original_height = (Shape.Width,
+                                           Shape.Height)
+        percentage_width, percentage_height = (shape_width / original_width * 100,
+                                               shape_height / original_height * 100)
+        Shape.ScaleWidth(percentage_width / 100, msoTrue)
+        Shape.ScaleHeight(percentage_height / 100, msoTrue)
+        if original_w_h:
+            return round(original_width), round(original_height)
+        return round(percentage_width), round(percentage_height)
