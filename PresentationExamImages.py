@@ -8,7 +8,7 @@ import imagehash
 import numpy as np
 from PIL import ImageDraw, Image
 
-from MSOCONSTANTS import ppShapeFormatJPG, msoTrue
+from MSOCONSTANTS import ppShapeFormatJPG
 from PresentationExamLayouts import PresentationExamLayouts as Layouts
 
 
@@ -141,23 +141,11 @@ class PresentationExamImages(object):
         if return_bool:
             return True
 
-    @staticmethod
-    def __get_shape_percentage_width_height(Shape):
-        shape_width, shape_height = Shape.Width, Shape.Height
-        Shape.ScaleWidth(1, msoTrue)
-        Shape.ScaleHeight(1, msoTrue)
-        original_w, original_h = round(shape_width / Shape.Width * 100), round(shape_height / Shape.Height * 100)
-        # rollback
-        print(original_w)
-        Shape.ScaleWidth(original_w / 100, msoTrue)
-        Shape.ScaleHeight(original_h / 100, msoTrue)
-        return original_w, original_h
-
     def distorted_images(self):
         for Slide in self._Presentation.Slides:
             for Shape in Slide.Shapes:
                 if not self._Utils.is_text(Shape):
-                    w, h = self.__get_shape_percentage_width_height(Shape)
+                    w, h = self._Utils.get_shape_percentage_width_height(Shape)
                     if abs(w - h) > 10:
                         return True
         return False
