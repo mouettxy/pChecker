@@ -1,7 +1,8 @@
+import inspect
+
 from MSOCONSTANTS import msoPlaceholder, msoOrientationHorizontal
 from MSOCONSTANTS import ppPlaceholderCenterTitle, ppPlaceholderTitle, ppPlaceholderSubtitle
 from PresentationExamLayouts import PresentationExamLayouts as Layouts
-import inspect
 
 
 class PresentationExamAnalyze(object):
@@ -88,6 +89,22 @@ class PresentationExamAnalyze(object):
         if len(self._typefaces) == 1:
             result['typefaces'] = True
 
+        # cropped images
+        for Slide in self._Presentation.Slides:
+            if Slide.SlideIndex == 2 or Slide.SlideIndex == 3:
+                for Shape in Slide.Shapes:
+                    if not self._Utils.is_text(Shape):
+                        crop_values = self._Utils.get_shape_crop_values(Shape)
+                        if all(value == 0 or value == 0.0 for value in crop_values.values()):
+                            continue
+                        else:
+                            warning = (f'Картинка {Shape.Name} с ID {Shape.Id} обрезана слева/справа/сверху/cнизу на '
+                                       f'{crop_values["left"]}/{crop_values["right"]}/{crop_values["top"]}/'
+                                       f'{crop_values["bottom"]}')
+                            if Slide.SlideIndex == 2:
+                                self._warnings['Предупреждения во втором слайде'].append(warning)
+                            elif Slide.SlideIndex == 3:
+                                self._warnings['Предупреждения в третьем слайде'].append(warning)
         return result
 
     def __analyze_first_slide(self):
@@ -331,7 +348,7 @@ class PresentationExamAnalyze(object):
             # if all criteria is true we give max grade and leave
             if list(self._Utils.dict_to_list(detail_result)).count("Не выполнено.") == 0:
                 result_grade = 2
-                return detail_result, result_grade
+                return detail_result, result_grade, self._warnings
 
             # check if we can give grade 1
             structure_c = list(self._Utils.dict_to_list(detail_result, "Структура")).count("Не выполнено.")
@@ -344,13 +361,13 @@ class PresentationExamAnalyze(object):
                     result_grade = 1
                 elif structure_c == 0 and font_c == 0 and images_c == 1:
                     result_grade = 1
-                return detail_result, result_grade
+                return detail_result, result_grade, self._warnings
             else:
                 if (self._Presentation.Slides.Count == 2 and
                         structure_c == 0 and font_c == 0 and images_c == 0 and
                         data['average']['contains_layout']):
                     result_grade = 1
-            return detail_result, result_grade
+            return detail_result, result_grade, self._warnings
         elif how == "minimal":
             pass
         elif how == "errors":
