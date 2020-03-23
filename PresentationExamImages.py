@@ -1,6 +1,8 @@
 import inspect
 import os
+import random
 import shutil
+import string
 import zipfile
 
 import cv2
@@ -130,14 +132,23 @@ class PresentationExamImages(object):
             shutil.rmtree(os.path.abspath(directory_to_delete))
             return False
 
-    def __generate_images_screenshots(self, return_path=False, return_bool=False, directory="temp"):
+    def __generate_images_screenshots(self, return_path=False, return_bool=False, directory="temp", thumb=False):
         if not os.path.exists(directory):
             os.mkdir(directory)
+        result = []
         for Slide in self._Presentation.Slides:
             screenshot_path = os.path.abspath(f"{directory}/slide_{Slide.SlideIndex}.jpg")
             Slide.Export(screenshot_path, "JPG")
-            if return_path is True:
-                yield screenshot_path
+            result.append(screenshot_path)
+            if thumb:
+                image = Image.open(screenshot_path)
+                image.thumbnail((200, 200), Image.ANTIALIAS)
+                random_name = ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
+                thumb_path = os.path.abspath(f"{directory}/{random_name}.jpg")
+                image.save(thumb_path)
+                return thumb_path
+        if return_path is True:
+            return result
         if return_bool:
             return True
 
@@ -169,6 +180,8 @@ class PresentationExamImages(object):
                 return self.__generate_images_skeleton(return_bool=True)
         elif typeof == "layout":
             return self.__generate_images_layout(lt)
+        elif typeof == "thumb":
+            return self.__generate_images_screenshots(thumb=True)
         else:
             return "Mismatched type of generation"
 
