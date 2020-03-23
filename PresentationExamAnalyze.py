@@ -380,4 +380,22 @@ class PresentationExamAnalyze(object):
         return self._warnings
 
     def get(self, how="detail"):
+        if how == "slides_count":
+            return self._Presentation.Slides.Count
+        elif how == "thumb":
+            return self._Images.get("thumb")
+        elif how == "string_formatted":
+            res = ""
+            analyze = self.__summary(how="detail")
+            for first_layer in analyze[0]:
+                res += f"{first_layer}\n"
+                for second_layer in analyze[0][first_layer]:
+                    res += f"    {second_layer} : {analyze[0][first_layer][second_layer]}\n"
+            res += "\n\r"
+            for warning_type in analyze[2]:
+                if len(analyze[2][warning_type]) > 0:
+                    res += f"{warning_type}\n"
+                    for warning in analyze[2][warning_type]:
+                        res += f"    {warning}\n"
+            return res
         return self.__summary(how=how)
