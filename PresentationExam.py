@@ -1,11 +1,9 @@
 # coding: utf-8
-import os
-import shutil
-
 import win32com.client
-from PresentationExamUtils import PresentationExamUtils as Utils
+
 from PresentationExamAnalyze import PresentationExamAnalyze as Analyze
 from PresentationExamImages import PresentationExamImages as Images
+from PresentationExamUtils import PresentationExamUtils as Utils
 
 '''
 CHEATSHEET
@@ -37,6 +35,9 @@ class PresentationExam(object):
     @property
     def Analyze(self):
         return self._Analyze
+
+    def open(self) -> None:
+        self._Presentation.NewWindow().Activate()
 
     def save(self):
         return self._Presentation.Save()
