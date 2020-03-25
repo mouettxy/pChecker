@@ -13,12 +13,6 @@ class PresentationExamAnalyze(object):
         self._Utils = utils
         self._Images = images
         self._layouts = inspect.getmembers(Layouts, predicate=inspect.isfunction)
-        self._warnings = {
-            'Предупреждения в первом слайде': [],
-            'Предупреждения во втором слайде': [],
-            'Предупреждения в третьем слайде': [],
-            'Предупреждения по презентации': [],
-        }
         self._typefaces = set()
 
     def __analyze_presentation_slide_parameters(self):
@@ -38,19 +32,6 @@ class PresentationExamAnalyze(object):
             result['aspect_ratio'] = True
         if self._Presentation.Slides.Count == 3:
             result['three_slides'] = True
-
-        # check how many animations have presentation and if have generate warning
-        # if slide have entry effect generates warning too
-        shape_animations = 0
-        for Slide in self._Presentation.Slides:
-            if Slide.TimeLine.MainSequence.Count >= 1:
-                shape_animations += Slide.TimeLine.MainSequence.Count
-            if Slide.SlideShowTransition.EntryEffect:
-                self._warnings["Предупреждения по презентации"].append(
-                    f"Найдена анимация перехода на слайде номер {Slide.SlideIndex}.")
-        if shape_animations:
-            self._warnings["Предупреждения по презентации"].append(
-                f"Найдены анимации в объектах: {shape_animations}.")
 
         if self._Images.compare():
             result['original_photos'] = True
@@ -88,23 +69,6 @@ class PresentationExamAnalyze(object):
 
         if len(self._typefaces) == 1:
             result['typefaces'] = True
-
-        # cropped images
-        for Slide in self._Presentation.Slides:
-            if Slide.SlideIndex == 2 or Slide.SlideIndex == 3:
-                for Shape in Slide.Shapes:
-                    if not self._Utils.is_text(Shape):
-                        crop_values = self._Utils.get_shape_crop_values(Shape)
-                        if all(value == 0 or value == 0.0 for value in crop_values.values()):
-                            continue
-                        else:
-                            warning = (f'Картинка {Shape.Name} с ID {Shape.Id} обрезана слева/справа/сверху/cнизу на '
-                                       f'{crop_values["left"]}/{crop_values["right"]}/{crop_values["top"]}/'
-                                       f'{crop_values["bottom"]}')
-                            if Slide.SlideIndex == 2:
-                                self._warnings['Предупреждения во втором слайде'].append(warning)
-                            elif Slide.SlideIndex == 3:
-                                self._warnings['Предупреждения в третьем слайде'].append(warning)
         return result
 
     def __analyze_first_slide(self):
@@ -122,10 +86,6 @@ class PresentationExamAnalyze(object):
                 previous_shape = shape_dimensions
             elif previous_shape is not None:
                 shape_overlaps.add(self._Utils.check_collision_between_shapes(shape_dimensions, previous_shape))
-            # generate warning if first shape has images
-            if self._Utils.is_image(Shape):
-                self._warnings['Предупреждения в первом слайде'].append(f"Изображение {Shape.Name} с ID {Shape.Id}")
-                continue
             # process placeholders
             if Shape.Type == msoPlaceholder:
                 if Shape.PlaceholderFormat.Type == ppPlaceholderCenterTitle:
@@ -144,9 +104,6 @@ class PresentationExamAnalyze(object):
                     # it's not placeholder, it's not image, that can be any object that PowerPoint have
                     # generating warning in this case, and counts this as text
                     reserve_object_counter += 1
-                    self._warnings['Предупреждения в первом слайде'].append(
-                        f"Непредсказанный тип объекта {Shape.Name} с ID {Shape.Id}"
-                    )
             # reserve algorithm if no placeholders in slide, we count whole objects
             else:
                 if self._Utils.is_text(Shape):
@@ -168,8 +125,6 @@ class PresentationExamAnalyze(object):
         if len(font_sizes) == 2:
             if 40.0 in font_sizes and 24.0 in font_sizes:
                 result['correct_font_size'] = True
-        else:
-            self._warnings['Предупреждения в первом слайде'].append(f"Больше двух текстовых элементов на слайде.")
 
         if not len(shape_overlaps) > 1:
             result['shapes_overlaps'] = False
@@ -190,10 +145,6 @@ class PresentationExamAnalyze(object):
                         title = True
                 font_sizes.append(Shape.TextFrame.TextRange.Font.Size)
                 text_blocks += 1
-            elif self._Utils.is_text(Shape) is None:
-                self._warnings['Предупреждения во втором слайде'].append(
-                    f"Пустой текстовый блок {Shape.Name} с ID {Shape.Id}"
-                )
             else:
                 if self._Utils.is_image(Shape):
                     images += 1
@@ -348,7 +299,7 @@ class PresentationExamAnalyze(object):
             # if all criteria is true we give max grade and leave
             if list(self._Utils.dict_to_list(detail_result)).count("Не выполнено.") == 0:
                 result_grade = 2
-                return detail_result, result_grade, self._warnings
+                return detail_result, result_grade
 
             # check if we can give grade 1
             structure_c = list(self._Utils.dict_to_list(detail_result, "Структура")).count("Не выполнено.")
@@ -361,13 +312,13 @@ class PresentationExamAnalyze(object):
                     result_grade = 1
                 elif structure_c == 0 and font_c == 0 and images_c == 1:
                     result_grade = 1
-                return detail_result, result_grade, self._warnings
+                return detail_result, result_grade
             else:
                 if (self._Presentation.Slides.Count == 2 and
                         structure_c == 0 and font_c == 0 and images_c == 0 and
                         data['average']['contains_layout']):
                     result_grade = 1
-            return detail_result, result_grade, self._warnings
+            return detail_result, result_grade
         elif how == "minimal":
             pass
         elif how == "errors":
@@ -377,7 +328,47 @@ class PresentationExamAnalyze(object):
 
     @property
     def warnings(self):
-        return self._warnings
+        warnings = {0: [], 1: [], 2: [], 3: []}
+        shape_animations, slide_1_text_blocks = 0, 0
+        for Slide in self._Presentation.Slides:
+            # count slide animations or entry effects
+            if Slide.TimeLine.MainSequence.Count >= 1:
+                shape_animations += Slide.TimeLine.MainSequence.Count
+            if Slide.SlideShowTransition.EntryEffect:
+                warnings[0].append(f"Найдена анимация перехода на слайде номер {Slide.SlideIndex}.")
+
+            for Shape in Slide.Shapes:
+                crop = self._Utils.get_shape_crop_values(Shape)
+                crop_warning = (f'Картинка {Shape.Name} с ID {Shape.Id} обрезана слева/справа/сверху/cнизу на '
+                                f'{crop["left"]}/{crop["right"]}/{crop["top"]}/{crop["bottom"]}')
+                if Slide.SlideIndex == 1:
+                    if self._Utils.is_image(Shape):
+                        warnings[1].append(f"Изображение {Shape.Name} с ID {Shape.Id}")
+                    elif self._Utils.is_text(Shape) is True:
+                        slide_1_text_blocks += 1
+                    elif self._Utils.is_text(Shape) is None:
+                        warnings[1].append(f"Пустой текстовый блок {Shape.Name} с ID {Shape.Id}")
+                    elif not self._Utils.is_text(Shape):
+                        warnings[1].append(f"Неопознаный тип обьекта {Shape.Name} с ID {Shape.Id}")
+                    if slide_1_text_blocks > 2:
+                        warnings[1].append(f"Больше двух текстовых элементов на слайде.")
+                elif Slide.SlideIndex == 2:
+                    if self._Utils.is_text(Shape) is None:
+                        warnings[2].append(f"Пустой текстовый блок {Shape.Name} с ID {Shape.Id}")
+                    elif not self._Utils.is_text(Shape) and not self._Utils.is_image(Shape):
+                        warnings[2].append(f"Неопознаный тип обьекта {Shape.Name} с ID {Shape.Id}")
+                    if crop:
+                        warnings[2].append(crop_warning)
+                elif Slide.SlideIndex == 3:
+                    if self._Utils.is_text(Shape) is None:
+                        warnings[3].append(f"Пустой текстовый блок {Shape.Name} с ID {Shape.Id}")
+                    elif not self._Utils.is_text(Shape) and not self._Utils.is_image(Shape):
+                        warnings[3].append(f"Неопознаный тип обьекта {Shape.Name} с ID {Shape.Id}")
+                    if crop:
+                        warnings[3].append(crop_warning)
+        if shape_animations:
+            warnings[0].append(f"Найдены анимации в объектах: {shape_animations}.")
+        return warnings
 
     def get(self, how="detail"):
         if how == "slides_count":
@@ -392,10 +383,14 @@ class PresentationExamAnalyze(object):
                 for second_layer in analyze[0][first_layer]:
                     res += f"    {second_layer} : {analyze[0][first_layer][second_layer]}\n"
             res += "\n\r"
-            for warning_type in analyze[2]:
-                if len(analyze[2][warning_type]) > 0:
-                    res += f"{warning_type}\n"
-                    for warning in analyze[2][warning_type]:
+            warnings = self.warnings
+            for warning_type in warnings:
+                if len(warnings[warning_type]) > 0:
+                    if warning_type == 0:
+                        res += f"Предупреждения по презентации\n"
+                    else:
+                        res += f"Предупреждения в слайде №{warning_type}\m"
+                    for warning in warnings[warning_type]:
                         res += f"    {warning}\n"
             return res
         return self.__summary(how=how)
