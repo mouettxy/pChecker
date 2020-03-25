@@ -109,7 +109,7 @@ class PresentationExamUtils(object):
                 'bottom': self.convert_points_px(Shape.PictureFormat.CropBottom),
             }
         else:
-            return {'left': 0, 'top': 0, 'right': 0, 'bottom': 0}
+            return None
 
     @staticmethod
     def get_shape_percentage_width_height(Shape, original_w_h=False):
