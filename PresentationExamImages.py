@@ -1,13 +1,9 @@
 import inspect
-import os
-import random
 import shutil
-import string
 import zipfile
+from pathlib import Path
 
-import cv2
 import imagehash
-import numpy as np
 from PIL import ImageDraw, Image
 
 from MSOCONSTANTS import ppShapeFormatJPG
@@ -20,9 +16,12 @@ class PresentationExamImages(object):
         self._Presentation = presentation
         self._Utils = utils
         self._layouts = inspect.getmembers(Layouts, predicate=inspect.isfunction)
+        self.path = Path(self._Presentation.Path + "/" + self._Presentation.Name).resolve()
+        self.destination = Path(f"temp/{self._Presentation.Name}").resolve()
+        self.destination.mkdir(exist_ok=True, parents=True)
 
     @staticmethod
-    def __skeleton_rectangle(draw, shape_dimensions, color, outline):
+    def __draw_rectangle(draw, shape_dimensions, color, outline="red"):
         return draw.rectangle(
             [shape_dimensions['left'],
              shape_dimensions['top'],
@@ -32,169 +31,159 @@ class PresentationExamImages(object):
             outline=outline
         )
 
-    def __generate_images_skeleton(self, return_path=False, return_bool=False, directory="temp"):
-        if not os.path.exists(directory):
-            os.mkdir(directory)
+    def __generate_images_skeleton(self):
+        paths = []
         for Slide in self._Presentation.Slides:
-            skeleton = Image.new("RGB",
-                                 color="#ffffff",
-                                 size=(self._Utils.convert_points_px(self._Presentation.PageSetup.SlideWidth),
-                                       self._Utils.convert_points_px(self._Presentation.PageSetup.SlideHeight))
-                                 )
-            skeleton_path = os.path.abspath(f"{directory}/skeleton_{Slide.SlideIndex}.jpg")
-            skeleton_draw = ImageDraw.Draw(skeleton)
+            path = Path.joinpath(self.destination, f"skeleton_{Slide.SlideIndex}.jpg")
+            image = Image.new(
+                "RGB",
+                color="white",
+                size=(self._Utils.convert_points_px(self._Presentation.PageSetup.SlideWidth),
+                      self._Utils.convert_points_px(self._Presentation.PageSetup.SlideHeight))
+            )
+            skeleton_draw = ImageDraw.Draw(image)
             for Shape in Slide.Shapes:
                 shape_dimensions = self._Utils.get_shape_dimensions(Shape)
                 if self._Utils.is_text(Shape) is True:
-                    self.__skeleton_rectangle(skeleton_draw, shape_dimensions, "yellow", "red")
+                    self.__draw_rectangle(skeleton_draw, shape_dimensions, "yellow", "red")
                 elif self._Utils.is_text(Shape) is None:
-                    self.__skeleton_rectangle(skeleton_draw, shape_dimensions, "orange", "yellow")
+                    self.__draw_rectangle(skeleton_draw, shape_dimensions, "orange", "yellow")
                 elif self._Utils.is_image(Shape) is True:
-                    self.__skeleton_rectangle(skeleton_draw, shape_dimensions, "blue", "yellow")
+                    self.__draw_rectangle(skeleton_draw, shape_dimensions, "blue", "yellow")
                 else:
-                    self.__skeleton_rectangle(skeleton_draw, shape_dimensions, "red", "yellow")
-                skeleton.save(skeleton_path)
-            if return_path is True:
-                yield skeleton_path
-        if return_bool is True:
-            return True
+                    self.__draw_rectangle(skeleton_draw, shape_dimensions, "red", "yellow")
+            image.save(path)
+            paths.append(path)
+        return paths
 
-    def __generate_images_layout(self, lt="layout_1", directory="temp"):
+    def __generate_images_layout(self, lt="layout_1"):
         """
         Experimental
-        :return: None
         """
-        if not os.path.exists(directory):
-            os.mkdir(directory)
-        width = self._Utils.convert_points_px(self._Presentation.PageSetup.SlideWidth)
-        height = self._Utils.convert_points_px(self._Presentation.PageSetup.SlideHeight)
-        result = []
-        layout = self._layouts[lt][1](width, height)
+        paths = []
+        color = (250, 250, 250, 1)
+        layout = None
+        for layout in self._layouts:
+            if layout[0] == lt:
+                layout = layout[1](self._Utils.convert_points_px(self._Presentation.PageSetup.SlideWidth),
+                                   self._Utils.convert_points_px(self._Presentation.PageSetup.SlideHeight))
+                break
         for slide in layout:
-            image_path = os.path.abspath(f"{directory}/image_{slide}.png")
-            cv2.imwrite(image_path, 255 * np.ones((height, width, 3), np.uint8))
-            image = cv2.imread(image_path)
-            overlay = image.copy()
-            for i in layout[slide]['images']:
-                l, t, w, h = int(i[0]), int(i[1]), int(i[2]), int(i[3])
-                cv2.rectangle(overlay, (l, t), (w + l, h + t), (0, 255, 0), -1)
-            for t in layout[slide]['text_blocks']:
-                l, t, w, h = int(t[0]), int(t[1]), int(t[2]), int(t[3])
-                cv2.rectangle(overlay, (l, t), (w + l, h + t), (255, 0, 0), -1)
-            cv2.addWeighted(overlay, 0.7, image, 0.3, 0, image)
-            cv2.imwrite(image_path, image)
-            result.append(image_path)
-        return result
+            path = Path.joinpath(self.destination, f"layout_{slide}.png")
+            image = Image.new(
+                "RGB",
+                (self._Utils.convert_points_px(self._Presentation.PageSetup.SlideWidth),
+                 self._Utils.convert_points_px(self._Presentation.PageSetup.SlideHeight)),
+                "white"
+            )
+            draw = ImageDraw.Draw(image, "RGBA")
+            for block_type in layout[slide]:
+                if block_type == "title":
+                    color = (27, 94, 32, 100)
+                elif block_type == "images":
+                    color = (245, 127, 23, 120)
+                elif block_type == "text_blocks":
+                    color = (26, 35, 126, 175)
+                for dims in layout[slide][block_type]:
+                    dims = {'left': dims[0], 'top': dims[1], 'width': dims[2], 'height': dims[3]}
+                    self.__draw_rectangle(draw, dims, color)
+            image.save(path)
+            paths.append(path)
+        return paths
 
-    def __get_picture_shape_images(self, return_path=False, return_bool=False):
+    def __get_picture_shape_images(self):
         """
         Reserved for internal use
         """
-        if not os.path.exists('shapes_images'):
-            os.mkdir('shapes_images')
-        counter = 0
+        destination = Path.joinpath(self.destination, 'shapes')
+        destination.mkdir(exist_ok=True, parents=True)
+        paths = []
         for Slide in self._Presentation.Slides:
             for Shape in Slide.Shapes:
                 if self._Utils.is_image(Shape):
-                    counter += 1
-                    path = os.getcwd() + f"\\shapes_images\\picture_{counter}.jpg"
+                    path = Path.joinpath(destination, f"{Slide.SlideIndex}_{Shape.Id}.jpg")
                     Shape.Export(path, ppShapeFormatJPG)
-                    if return_path:
-                        yield path
-        if return_bool:
-            return True
+                    paths.append(path)
+        return paths
 
-    def __save_original_images_presentation(self, directory="original_images_presentation"):
-        if not os.path.exists(directory):
-            os.mkdir(directory)
-        file, c = zipfile.ZipFile(os.path.join(self._Presentation.Path, self._Presentation.Name)), 0
+    def __save_original_images_presentation(self):
+        paths = []
+        file = zipfile.ZipFile(self.path)
+        destination = Path.joinpath(self.destination, "media")
+        destination.mkdir(parents=True, exist_ok=True)
         for f in file.namelist():
             if f.startswith('ppt/media'):
-                save_path = os.path.abspath(f"{directory}/image_{c}.jpg")
-                shutil.copyfileobj(file.open(f), open(save_path, "wb"))
-                c += 1
-                yield save_path
+                path = Path.joinpath(destination, Path(f).name)
+                shutil.copyfileobj(file.open(f), open(path, "wb"))
+                paths.append(path)
+        return paths
 
-    def __compare_images(self, directory="original_images", directory_to_delete="original_images_presentation"):
-        path_to_shape_images = list(self.__save_original_images_presentation())
-        compare_images_counter = 0
-        for original_image_name in os.listdir(os.path.abspath(directory)):
-            for shape_image_path in path_to_shape_images:
-                original_image = Image.open(os.path.abspath(f"{directory}/{original_image_name}"))
-                shape_image = Image.open(shape_image_path)
-                if imagehash.average_hash(original_image) == imagehash.average_hash(shape_image):
-                    compare_images_counter += 1
+    def __compare_images(self, path='original_images'):
+        original_images, counter, shape_images = [], 0, self.__save_original_images_presentation()
+        for extension in ['*.png', '*.jpg', '*.jpeg']:
+            original_images.extend(Path(path).resolve().glob(extension))
+        for o_path in original_images:
+            for s_path in shape_images:
+                o_image = Image.open(o_path)
+                s_image = Image.open(s_path)
+                if imagehash.average_hash(o_image) == imagehash.average_hash(s_image):
+                    counter += 1
                     break
-        else:
-            if len(path_to_shape_images) == compare_images_counter:
-                shutil.rmtree(os.path.abspath(directory_to_delete))
-                return True
-            shutil.rmtree(os.path.abspath(directory_to_delete))
-            return False
-
-    def __generate_images_screenshots(self, return_path=False, return_bool=False, directory="temp", thumb=False):
-        if not os.path.exists(directory):
-            os.mkdir(directory)
-        result = []
-        for Slide in self._Presentation.Slides:
-            screenshot_path = os.path.abspath(f"{directory}/slide_{Slide.SlideIndex}.jpg")
-            Slide.Export(screenshot_path, "JPG")
-            result.append(screenshot_path)
-            if thumb:
-                image = Image.open(screenshot_path)
-                image.thumbnail((200, 200), Image.ANTIALIAS)
-                random_name = ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
-                thumb_path = os.path.abspath(f"{directory}/{random_name}.jpg")
-                image.save(thumb_path)
-                return thumb_path
-        if return_path is True:
-            return result
-        if return_bool:
+        if len(shape_images) == counter:
             return True
+        return False
+
+    def __generate_images_screenshots(self, thumb=False):
+        paths = []
+        for Slide in self._Presentation.Slides:
+            path = Path.joinpath(self.destination, f"screenshot_{Slide.SlideIndex}.jpg")
+            Slide.Export(path, "JPG")
+            paths.append(path)
+            if thumb:
+                image = Image.open(path)
+                image.thumbnail((200, 200), Image.ANTIALIAS)
+                image.save(Path(self.destination, "thumb.jpg"))
+                return Path(self.destination, "thumb.jpg")
+        return paths
 
     def distorted_images(self):
         for Slide in self._Presentation.Slides:
             for Shape in Slide.Shapes:
-                if not self._Utils.is_text(Shape):
+                if self._Utils.is_image(Shape):
                     w, h = self._Utils.get_shape_percentage_width_height(Shape)
                     if abs(w - h) > 10:
                         return True
         return False
 
-    def compare(self):
-        if os.path.exists(os.path.abspath("original_images")):
-            return self.__compare_images()
+    def compare(self, path="original_images"):
+        if Path(path).exists():
+            return self.__compare_images(path=path)
         else:
             return "Не загружены изображения."
 
-    def get(self, typeof="exact_match", return_path=True, lt="layout_1"):
-        if typeof == "exact_match":
-            if return_path:
-                return list(self.__generate_images_screenshots(return_path=True))
-            else:
-                return self.__generate_images_screenshots(return_bool=True)
+    def get(self, typeof="screenshot", lt="layout_1"):
+        if typeof == "screenshot":
+            return self.__generate_images_screenshots()
         elif typeof == "skeleton":
-            if return_path:
-                return list(self.__generate_images_skeleton(return_path=True))
-            else:
-                return self.__generate_images_skeleton(return_bool=True)
+            return self.__generate_images_skeleton()
         elif typeof == "layout":
             return self.__generate_images_layout(lt)
         elif typeof == "thumb":
             return self.__generate_images_screenshots(thumb=True)
         else:
-            return "Mismatched type of generation"
+            return "Неожиданный тип генерации."
+            # TODO: exception here
 
     @staticmethod
     def upload_images(from_directory):
-        if os.path.isdir(from_directory):
-            if not os.path.exists(os.path.abspath('original_images')):
-                os.mkdir('original_images')
-            for filename in os.listdir(from_directory):
-                if (os.path.splitext(filename)[-1] == ".jpg" or
-                        os.path.splitext(filename)[-1] == ".jpeg" or
-                        os.path.splitext(filename)[-1] == ".png"):
-                    path = os.path.join(from_directory, filename)
-                    shutil.copy(path, os.path.abspath('original_images'), follow_symlinks=True)
+        f_dir = Path(from_directory).resolve()
+        if f_dir.is_dir():
+            path = Path('original_images').resolve()
+            if path.exists():
+                shutil.rmtree(path, ignore_errors=True)
+            path.mkdir(parents=True)
+            for filename in f_dir.iterdir():
+                if filename.suffix in ['.png', '.jpg', '.jpeg']:
+                    shutil.copy(filename, path, follow_symlinks=True)
             return True
         return False  # TODO generate expression here
