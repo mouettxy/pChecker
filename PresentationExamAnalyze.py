@@ -1,7 +1,6 @@
 import inspect
 
-from MSOCONSTANTS import msoPlaceholder, msoOrientationHorizontal
-from MSOCONSTANTS import ppPlaceholderCenterTitle, ppPlaceholderTitle, ppPlaceholderSubtitle
+from MSOCONSTANTS import msoOrientationHorizontal
 from PresentationExamLayouts import PresentationExamLayouts as Layouts
 
 
@@ -12,319 +11,261 @@ class PresentationExamAnalyze(object):
         self._Application = application
         self._Utils = utils
         self._Images = images
-        self._layouts = inspect.getmembers(Layouts, predicate=inspect.isfunction)
-        self._typefaces = set()
 
-    def __analyze_presentation_slide_parameters(self):
-        result = {
-            'three_slides': False,
-            'aspect_ratio': False,
-            'orientation': False,
-            'typefaces': False,
-            'original_photos': False,
-            'contains_layout': False,
-            'which_layout': None,
-        }
-        if self._Presentation.PageSetup.SlideOrientation == msoOrientationHorizontal:
-            result['orientation'] = True
-        if ((self._Presentation.PageSetup.SlideWidth / self._Presentation.PageSetup.SlideHeight) *
-            (self._Presentation.PageSetup.SlideHeight / self._Presentation.PageSetup.SlideWidth)) == 1.0:
-            result['aspect_ratio'] = True
-        if self._Presentation.Slides.Count == 3:
-            result['three_slides'] = True
-
-        if self._Images.compare():
-            result['original_photos'] = True
-
-        # layout check
-        for layout in self._layouts:
-            layout_name = layout[0]
-            layout_dimensions = layout[1](self._Utils.convert_points_px(self._Presentation.PageSetup.SlideWidth),
-                                          self._Utils.convert_points_px(self._Presentation.PageSetup.SlideHeight))
-            rectangles = []
-            all_objects, objects_with_collision = set(), set()
+    def __find_layout(self):
+        layouts = inspect.getmembers(Layouts, predicate=inspect.isfunction)
+        for layout in layouts:
+            name = layout[0]
+            layout_positions = layout[1](self._Utils.convert_points_px(self._Presentation.PageSetup.SlideWidth),
+                                         self._Utils.convert_points_px(self._Presentation.PageSetup.SlideHeight))
+            positions = []
+            elements, collision = set(), set()
             for Slide in self._Presentation.Slides:
                 if Slide.SlideIndex == 2 or Slide.SlideIndex == 3:
                     for Shape in Slide.Shapes:
-                        all_objects.add(Shape.Name)
-                        shape_dimensions = self._Utils.get_shape_dimensions(Shape)
+                        elements.add(Shape.Name)
+                        s_dims = self._Utils.get_shape_dimensions(Shape)
                         if self._Utils.is_text(Shape):
-                            rectangles = layout_dimensions[Slide.SlideIndex]['text_blocks']
+                            positions = layout_positions[Slide.SlideIndex]['text_blocks'] + \
+                                        layout_positions[Slide.SlideIndex]['title']
                         elif self._Utils.is_image(Shape):
-                            rectangles = layout_dimensions[Slide.SlideIndex]['images']
-                        for r in rectangles:
-                            rectangle_dimensions = {'left': r[0], 'top': r[1], 'width': r[2], 'height': r[3]}
-                            if self._Utils.check_collision_between_shapes(shape_dimensions,
-                                                                          rectangle_dimensions):
-                                objects_with_collision.add(Shape.Name)
-            if len(all_objects) == len(objects_with_collision):
-                result['contains_layout'] = True
-                result['which_layout'] = layout_name
+                            positions = layout_positions[Slide.SlideIndex]['images']
+                        for position in positions:
+                            position = {'left': position[0], 'top': position[1],
+                                        'width': position[2], 'height': position[3]}
+                            if self._Utils.check_collision_between_shapes(s_dims, position):
+                                collision.add(Shape.Name)
+            if len(elements) == len(collision):
+                return True, name
+        return False
 
-        # typefaces
+    def __analyze_presentation(self):
+        analyze = {0: False, 1: False, 2: False, 3: False, 4: False, 5: False, 6: False, 13: True}
+        prs, typefaces = self._Presentation, set()
+        layout = self.__find_layout()
+
+        if prs.Slides.Count == 3:
+            analyze[0] = True
+        if ((prs.PageSetup.SlideWidth / prs.PageSetup.SlideHeight) *
+            (prs.PageSetup.SlideHeight / prs.PageSetup.SlideWidth)) == 1.0:
+            analyze[1] = True
+        if prs.PageSetup.SlideOrientation == msoOrientationHorizontal:
+            analyze[2] = True
         for Slide in self._Presentation.Slides:
             for Shape in Slide.Shapes:
                 if self._Utils.is_text(Shape):
-                    self._typefaces.add(Shape.TextFrame.TextRange.Font.Name)
+                    typefaces.add(Shape.TextFrame.TextRange.Font.Name)
+        if len(typefaces) == 1:
+            analyze[3] = True
+        if self._Images.compare():
+            analyze[4] = True
+        if layout:
+            analyze[5], analyze[6] = layout
+        if self._Images.distorted_images():
+            analyze[13] = False
+        return analyze
 
-        if len(self._typefaces) == 1:
-            result['typefaces'] = True
-        return result
-
-    def __analyze_first_slide(self):
+    def __analyze_slide_1(self):
+        analyze = {7: False, 8: False, 9: False, 10: False}
         Slide = self._Presentation.Slides(1)
-        result = {
-            "has_title": False,
-            "has_subtitle": False,
-            "shapes_overlaps": True,
-            "correct_font_size": False
-        }
-        font_sizes, reserve_object_counter, previous_shape, shape_overlaps = [], 0, None, set()
+        # collect data
+        tmpDimensions, f_sizes, overlaps, counter = None, [], set(), 0
         for Shape in Slide.Shapes:
-            shape_dimensions = self._Utils.get_shape_dimensions(Shape)
-            if previous_shape is None:
-                previous_shape = shape_dimensions
-            elif previous_shape is not None:
-                shape_overlaps.add(self._Utils.check_collision_between_shapes(shape_dimensions, previous_shape))
-            # process placeholders
-            if Shape.Type == msoPlaceholder:
-                if Shape.PlaceholderFormat.Type == ppPlaceholderCenterTitle:
-                    result['has_title'] = True
-                elif Shape.PlaceholderFormat.Type == ppPlaceholderSubtitle:
-                    result['has_subtitle'] = True
-                elif Shape.PlaceholderFormat.Type == ppPlaceholderTitle:
-                    if not result['has_title'] and result['has_subtitle']:
-                        result['has_title'] = True
-                    elif result['has_title'] and not result['has_subtitle']:
-                        result['has_subtitle'] = False
-                    elif not result['has_title'] and not result['has_subtitle']:
-                        reserve_object_counter += 1
-                else:
-                    # uses reserve because object can be image or text or placeholder
-                    # it's not placeholder, it's not image, that can be any object that PowerPoint have
-                    # generating warning in this case, and counts this as text
-                    reserve_object_counter += 1
-            # reserve algorithm if no placeholders in slide, we count whole objects
+            dimensions = self._Utils.get_shape_dimensions(Shape)
+            if tmpDimensions is None:
+                tmpDimensions = dimensions
             else:
-                if self._Utils.is_text(Shape):
-                    reserve_object_counter += 1
-            # process font sizes
-            font_sizes.append(Shape.TextFrame.TextRange.Font.Size)
-            # add typefaces for future use
-            self._typefaces.add(Shape.TextFrame.TextRange.Font.Name)
-        # last chance to get correct slide, if no one placeholders found, has_title and has_subtitle be False
-        # we just counting text objects
-        if not result['has_title'] and not result['has_subtitle']:
-            if reserve_object_counter == 1:
-                result['has_title'] = True
-            elif reserve_object_counter == 2:
-                result['has_title'] = True
-                result['has_subtitle'] = True
-        # if font size contains 2 elements, there 2 text elements in slide, that correct, else - generate warning
-        # but process anyway
-        if len(font_sizes) == 2:
-            if 40.0 in font_sizes and 24.0 in font_sizes:
-                result['correct_font_size'] = True
+                overlaps.add(self._Utils.check_collision_between_shapes(dimensions, tmpDimensions))
 
-        if not len(shape_overlaps) > 1:
-            result['shapes_overlaps'] = False
+            if self._Utils.is_title(Shape):
+                if not analyze[7] and not analyze[8]:
+                    analyze[7] = True
+                elif analyze[7] and not analyze[8]:
+                    analyze[8] = True
+            elif self._Utils.is_text(Shape):
+                counter += 1
 
-        return result
+            f_sizes.append(Shape.TextFrame.TextRange.Font.Size)
 
-    def __base_slide_analyze(self, slide):
-        title, text_blocks, images, font_sizes, previous_shape, shape_overlaps = False, 0, 0, [], None, set()
-        for Shape in self._Presentation.Slides(slide).Shapes:
-            shape_dimensions = self._Utils.get_shape_dimensions(Shape)
-            if previous_shape is None:
-                previous_shape = shape_dimensions
-            elif previous_shape is not None:
-                shape_overlaps.add(self._Utils.check_collision_between_shapes(shape_dimensions, previous_shape))
-            if self._Utils.is_text(Shape) is True:
-                if self._Utils.is_title(Shape):
-                    if not title:
-                        title = True
-                font_sizes.append(Shape.TextFrame.TextRange.Font.Size)
+        if not analyze[7] and not analyze[8]:
+            if counter == 2:
+                analyze[7], analyze[8] = True, True
+            if counter == 1:
+                analyze[7] = True
+
+        if len(overlaps) == 1:
+            analyze[9] = True
+
+        if len(f_sizes) == 2:
+            if 40.0 in f_sizes and 24.0 in f_sizes:
+                analyze[10] = True
+
+        return analyze
+
+    def __base_analyze(self, slide):
+        tmpDimensions, overlaps, f_sizes, text_blocks, image_blocks, title = None, set(), [], 0, 0, False
+        Slide = self._Presentation.Slides(slide)
+        for Shape in Slide.Shapes:
+            dimensions = self._Utils.get_shape_dimensions(Shape)
+            if tmpDimensions is None:
+                tmpDimensions = dimensions
+            else:
+                overlaps.add(self._Utils.check_collision_between_shapes(dimensions, tmpDimensions))
+            if self._Utils.is_title(Shape):
+                if not title:
+                    title = True
+            elif self._Utils.is_text(Shape):
                 text_blocks += 1
-            else:
-                if self._Utils.is_image(Shape):
-                    images += 1
-        return title, text_blocks, images, font_sizes, shape_overlaps
+                f_sizes.append(Shape.TextFrame.TextRange.Font.Size)
+            elif self._Utils.is_image:
+                image_blocks += 1
+        return title, text_blocks, image_blocks, overlaps, f_sizes
 
-    def __analyze_second_slide(self):
-        result = {
-            "has_title": False,
-            "has_text_blocks": False,
-            "has_images": False,
-            "shapes_overlaps": True,
-            "correct_font_size": False,
+    def __analyze_slide_2(self):
+        analyze = {7: False, 9: False, 10: False, 11: False, 12: False}
+        analyze[7], text_blocks, image_blocks, overlaps, f_sizes = self.__base_analyze(2)
+        if text_blocks == 3 and analyze[7]:
+            analyze[7], analyze[11] = True, True
+        elif text_blocks == 3 and not analyze[7]:
+            analyze[7], analyze[11] = True, True
+        elif text_blocks == 2 and not analyze[7]:
+            analyze[7], analyze[11] = True, False
+        else:
+            analyze[7], analyze[11] = False, False
+        if len(overlaps) == 1:
+            analyze[9] = True
+        if f_sizes.count(20.0) == 2 and not analyze[7]:
+            analyze[10] = True
+        elif f_sizes.count(20.0) == 2 and f_sizes.count(24.0) and analyze[7]:
+            analyze[10] = True
+        if image_blocks == 2:
+            analyze[12] = True
+        return analyze
+
+    def __analyze_slide_3(self):
+        analyze = {7: False, 9: False, 10: False, 11: False, 12: False}
+        analyze[7], text_blocks, image_blocks, overlaps, f_sizes = self.__base_analyze(3)
+        if text_blocks == 3 and analyze[7]:
+            analyze[7], analyze[11] = True, True
+        elif text_blocks == 4 and not analyze[7]:
+            analyze[7], analyze[11] = True, True
+        elif text_blocks == 3 and not analyze[7]:
+            analyze[7], analyze[11] = True, False
+        else:
+            analyze[7], analyze[11] = False, False
+        if len(overlaps) == 1:
+            analyze[9] = True
+        if f_sizes.count(20.0) == 3 and not analyze[7]:
+            analyze[10] = True
+        elif f_sizes.count(20.0) == 3 and f_sizes.count(24.0) and analyze[7]:
+            analyze[10] = True
+        if image_blocks == 3:
+            analyze[12] = True
+        return analyze
+
+    @staticmethod
+    def __translate(analyze, grade=None):
+        presentation_analyze = {
+            "Правильное соотношение сторон слайда": "Выполнено" if analyze[1] else "Не выполнено",
+            "Горизонтальная ориентация слайдов": "Выполнено" if analyze[2] else "Не выполнено"
         }
 
-        result['has_title'], text_blocks, images, font_sizes, shape_overlaps = self.__base_slide_analyze(2)
-
-        if text_blocks == 2 and result['has_title']:
-            result['has_text_blocks'] = True
-        elif text_blocks == 3 and not result['has_title']:
-            result['has_text_blocks'] = True
-        elif text_blocks == 2 and not result['has_title']:
-            result['has_text_blocks'] = True
-            # play it safe
-            result['has_title'] = False
-        else:
-            result['has_text_blocks'], result['has_title'] = False, False
-
-        if images == 2:
-            result['has_images'] = True
-
-        if 20.0 in font_sizes and not result['has_title']:
-            result['correct_font_size'] = True
-        elif 20.0 in font_sizes and 24.0 in font_sizes and result['has_title']:
-            result['correct_font_size'] = True
-
-        if not len(shape_overlaps) > 1:
-            result['shapes_overlaps'] = False
-
-        return result
-
-    def __analyze_third_slide(self):
-        result = {
-            "has_title": False,
-            "has_text_blocks": False,
-            "has_images": False,
-            "shapes_overlaps": True,
-            "correct_font_size": False,
+        structure_analyze = {
+            "Три слайда в презентации": "Выполнено" if analyze[0] else "Не выполнено",
+            "Соответствует макету": "Выполнено" if analyze[5] else "Не выполнено",
+            "Три слайда имеют заголовки": "Выполнено" if analyze[7] else "Не выполнено",
+            "На первом слайде есть подзаголовок": "Выполнено" if analyze[8] else "Не выполнено",
+            "Элементы не перекрывают друг друга": "Выполнено" if analyze[9] else "Не выполнено",
+            "Правильное количество текстовых блоков на 2 и 3 слайде": "Выполнено" if analyze[11] else "Не выполнено",
+            "Правильное количество картинок на 2 и 3 слайде": "Выполнено" if analyze[12] else "Не выполнено"
         }
 
-        result['has_title'], text_blocks, images, font_sizes, shape_overlaps = self.__base_slide_analyze(3)
+        fonts_analyze = {
+            "Единый тип шрифта": "Выполнено" if analyze[3] else "Не выполнено",
+            "Правильный размер шрифта": "Выполнено" if analyze[10] else "Не выполнено"
+        }
 
-        if text_blocks == 3 and result['has_title']:
-            result['has_text_blocks'] = True
-        elif text_blocks == 4 and not result['has_title']:
-            result['has_text_blocks'] = True
-        elif text_blocks == 3 and not result['has_title']:
-            result['has_text_blocks'] = True
-            # play it safe
-            result['has_title'] = False
-        else:
-            result['has_text_blocks'], result['has_title'] = False, False
+        images_analyze = {
+            "Картинки соответствуют заданным": "Выполнено" if analyze[4] else "Не выполнено",
+            "Изображения не искажены": "Выполнено" if analyze[13] else "Не выполнено"
+        }
 
-        if images == 3:
-            result['has_images'] = True
+        if grade:
+            return presentation_analyze, structure_analyze, fonts_analyze, images_analyze, analyze[6], grade
+        return presentation_analyze, structure_analyze, fonts_analyze, images_analyze, analyze[6]
 
-        if 20.0 in font_sizes and not result['has_title']:
-            result['correct_font_size'] = True
-        elif 20.0 in font_sizes and 24.0 in font_sizes and result['has_title']:
-            result['correct_font_size'] = True
-
-        if not len(shape_overlaps) > 1:
-            result['shapes_overlaps'] = False
-
-        return result
-
-    def __summary(self, how="detail"):
+    def __summary(self, grade=True):
         """
-        :param how: detail / minimal / errors
-        :type how: string
-        :return:
+        0 - does prs have 3 slides
+        1 - right aspect ratio of presentation
+        2 - horizontal orientation
+        3 - right typefaces
+        4 - original photos
+        5 - contatins layout
+        6 - which layout
+        7 - title
+        8 - subtitle
+        9 - overlaps
+        10 - font sizes
+        11 - text blocks
+        12 - image blocks
+        13 - distorted images
+
+        Presentation:
+            1, 2
+        Structure:
+            0, 5, 7, 8, 9, 11, 12
+        Fonts:
+            3, 10
+        Images:
+            4 13
         """
-        data = {
-            'average': self.__analyze_presentation_slide_parameters(),
-            'first': self.__analyze_first_slide(),
-            'second': self.__analyze_second_slide(),
-        }
-        detail_result = {
-            "Презентация": {
-                "Слайды 16:9": "Не выполнено.",
-                "Горизонтальная ориентация": "Не выполнено.",
-            },
-            "Структура": {
-                "Презентация состоит ровно из трёх слайдов": "Не выполнено.",
-                "Информация на слайдах размещена согласно макету": "Не выполнено.",
-                "2 и 3 слайды имеют заголовки": "Не выполнено.",
-                "Элементы презентации не перекрывают друг друга": "Не выполнено.",
-            },
-            "Шрифт": {
-                "Единый тип шрифта": "Не выполнено.",
-                "Правильный размер шрифта": "Не выполнено.",
-            },
-            "Изображения": {
-                "Сохранены пропорции при масштабировании": "Не выполнено.",
-                "Соответствуют данным в задании изображениям": "Не выполнено.",
-            }
-        }
+        # 8 HOURS HERE
+        presentation_info, first_slide, second_slide = (self.__analyze_presentation(),
+                                                        self.__analyze_slide_1(),
+                                                        self.__analyze_slide_2())
+        if self._Presentation.Slides.Count >= 3:
+            third_slide = self.__analyze_slide_3()
+            data = {**presentation_info, **first_slide, **second_slide, **third_slide}
+            err_structure = [data[k] for k in data if k in [0, 5, 7, 8, 9, 11, 12]].count(False)
+            err_fonts = [data[k] for k in data if k in [3, 10]].count(False)
+            err_images = [data[k] for k in data if k in [4, 13]].count(False)
+            if grade:
+                r_grade = 0
+                # check if we can give grade 2 (max)
+                if all(value for value in data.values()):
+                    r_grade = 2
+                    return self.__translate(data, r_grade)
+                # or if we can give 1
+                if err_structure == 1 and not err_fonts and not err_images:
+                    r_grade = 1
+                elif not err_structure and err_fonts == 1 and not err_images:
+                    r_grade = 1
+                elif not err_structure and not err_fonts and err_images == 1:
+                    r_grade = 1
+                return self.__translate(data, grade=r_grade)
+            self.__translate(data)
+        elif self._Presentation.Slides.Count == 2:
+            data = {**presentation_info, **first_slide, **second_slide}
+            err_structure = [data[k] for k in data if k in [0, 5, 7, 8, 9, 11, 12]].count(False)
+            err_fonts = [data[k] for k in data if k in [3, 10]].count(False)
+            err_images = [data[k] for k in data if k in [4, 13]].count(False)
+            if grade:
+                r_grade = 0
+                if err_structure == 1 and not err_fonts and not err_images:
+                    r_grade = 1
+                return self.__translate(data, grade=r_grade)
+            return self.__translate(data)
 
-        if data['average']['three_slides']:
-            data['third'] = self.__analyze_third_slide()
-
-        if how == "detail":
-            detail_result['Структура']['Презентация состоит ровно из трёх слайдов'] = "Выполнено."
-            if data['average']['aspect_ratio']:
-                detail_result['Презентация']['Горизонтальная ориентация'] = "Выполнено."
-            if data['average']['orientation']:
-                detail_result['Презентация']['Слайды 16:9'] = "Выполнено."
-            if data['average']['contains_layout']:
-                detail_result['Структура']['Информация на слайдах размещена согласно макету'] = "Выполнено."
-            if data['average']['typefaces']:
-                detail_result['Шрифт']['Единый тип шрифта'] = "Выполнено."
-            # saved for future use
-            # if data['average']['images_aspect_ratio']:
-            #     result['Изображения']['Сохранены пропорции при масштабировании'] = "Выполнено."
-            if data['average']['original_photos']:
-                detail_result['Изображения']['Соответствуют данным в задании изображениям'] = "Выполнено."
-
-            if data['average']['three_slides']:
-                detail_result['Структура']['Презентация состоит ровно из трёх слайдов'] = "Выполнено."
-                if data['second']['has_title'] and data['third']['has_title']:
-                    detail_result['Структура']['2 и 3 слайды имеют заголовки'] = "Выполнено."
-                if (not data['first']['shapes_overlaps'] or
-                        not data['second']['shapes_overlaps'] or
-                        not data['third']['shapes_overlaps']):
-                    detail_result['Структура']['Элементы презентации не перекрывают друг друга'] = "Выполнено."
-                if (data['first']['correct_font_size'] and
-                        data['second']['correct_font_size'] and
-                        data['third']['correct_font_size']):
-                    detail_result['Шрифт']['Правильный размер шрифта'] = "Выполнено."
-            else:
-                detail_result['Структура']['Презентация состоит ровно из трёх слайдов'] = "Не выполнено."
-                if data['second']['has_title']:
-                    detail_result['Структура']['2 и 3 слайды имеют заголовки'] = "Выполнено."
-                if (not data['first']['shapes_overlaps'] or
-                        not data['second']['shapes_overlaps']):
-                    detail_result['Структура']['Элементы презентации не перекрывают друг друга'] = "Выполнено."
-                if (data['first']['correct_font_size'] and
-                        data['second']['correct_font_size']):
-                    detail_result['Шрифт']['Правильный размер шрифта'] = "Выполнено."
-
-            # process grade
-            result_grade = 0
-            # if all criteria is true we give max grade and leave
-            if list(self._Utils.dict_to_list(detail_result)).count("Не выполнено.") == 0:
-                result_grade = 2
-                return detail_result, result_grade
-
-            # check if we can give grade 1
-            structure_c = list(self._Utils.dict_to_list(detail_result, "Структура")).count("Не выполнено.")
-            font_c = list(self._Utils.dict_to_list(detail_result, "Шрифт")).count("Не выполнено.")
-            images_c = list(self._Utils.dict_to_list(detail_result, "Изображения")).count("Не выполнено.")
-            if data['average']['three_slides']:
-                if structure_c == 1 and font_c == 0 and images_c == 0:
-                    result_grade = 1
-                elif structure_c == 0 and font_c == 1 and images_c == 1:
-                    result_grade = 1
-                elif structure_c == 0 and font_c == 0 and images_c == 1:
-                    result_grade = 1
-                return detail_result, result_grade
-            else:
-                if (self._Presentation.Slides.Count == 2 and
-                        structure_c == 0 and font_c == 0 and images_c == 0 and
-                        data['average']['contains_layout']):
-                    result_grade = 1
-            return detail_result, result_grade
-        elif how == "minimal":
-            pass
-        elif how == "errors":
-            pass
-        else:
-            return "Не заявленный метод получения результата."
+    def get(self, typeof="analyze"):
+        if typeof == "analyze":
+            return self.__summary()
+        elif typeof == "analyze2":
+            return self.__summary(grade=False)
+        elif typeof == "thumb":
+            return self._Images.get("thumb")
+        elif typeof == "slides":
+            return self._Presentation.Slides.Count
 
     @property
     def warnings(self):
@@ -369,28 +310,3 @@ class PresentationExamAnalyze(object):
         if shape_animations:
             warnings[0].append(f"Найдены анимации в объектах: {shape_animations}.")
         return warnings
-
-    def get(self, how="detail"):
-        if how == "slides_count":
-            return self._Presentation.Slides.Count
-        elif how == "thumb":
-            return self._Images.get("thumb")
-        elif how == "string_formatted":
-            res = ""
-            analyze = self.__summary(how="detail")
-            for first_layer in analyze[0]:
-                res += f"{first_layer}\n"
-                for second_layer in analyze[0][first_layer]:
-                    res += f"    {second_layer} : {analyze[0][first_layer][second_layer]}\n"
-            res += "\n\r"
-            warnings = self.warnings
-            for warning_type in warnings:
-                if len(warnings[warning_type]) > 0:
-                    if warning_type == 0:
-                        res += f"Предупреждения по презентации\n"
-                    else:
-                        res += f"Предупреждения в слайде №{warning_type}\m"
-                    for warning in warnings[warning_type]:
-                        res += f"    {warning}\n"
-            return res
-        return self.__summary(how=how)
