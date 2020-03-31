@@ -1,2 +1,10 @@
 /temp
 /.idea
+/__init__.py
+/MSOCONSTANTS.py
+/PresentationExam.py
+/PresentationExamAnalyze.py
+/PresentationExamImages.py
+/PresentationExamLayouts.py
+/PresentationExamUtils.py
+/test_files
