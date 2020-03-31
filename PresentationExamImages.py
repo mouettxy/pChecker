@@ -173,17 +173,3 @@ class PresentationExamImages(object):
         else:
             return "Неожиданный тип генерации."
             # TODO: exception here
-
-    @staticmethod
-    def upload_images(from_directory):
-        f_dir = Path(from_directory).resolve()
-        if f_dir.is_dir():
-            path = Path('original_images').resolve()
-            if path.exists():
-                shutil.rmtree(path, ignore_errors=True)
-            path.mkdir(parents=True)
-            for filename in f_dir.iterdir():
-                if filename.suffix in ['.png', '.jpg', '.jpeg']:
-                    shutil.copy(filename, path, follow_symlinks=True)
-            return True
-        return False  # TODO generate expression here
