@@ -1,3 +1,5 @@
+import os
+
 from MSOCONSTANTS import msoTrue, msoPicture, msoLinkedPicture, msoPlaceholder
 from MSOCONSTANTS import ppPlaceholderCenterTitle, ppPlaceholderTitle, ppPlaceholderSubtitle
 from MSOCONSTANTS import ppPlaceholderPicture, msoScaleFromTopLeft
@@ -125,3 +127,23 @@ class PresentationExamUtils(object):
         if original_w_h:
             return round(original_width), round(original_height)
         return round(percentage_width), round(percentage_height)
+
+    @staticmethod
+    def get_download_path():
+        """Returns the default downloads path for linux or windows"""
+        if os.name == 'nt':
+            import winreg
+            sub_key = r'SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders'
+            downloads_guid = '{374DE290-123F-4565-9164-39C4925E467B}'
+            with winreg.OpenKey(winreg.HKEY_CURRENT_USER, sub_key) as key:
+                location = winreg.QueryValueEx(key, downloads_guid)[0]
+            return location
+        else:
+            return os.path.join(os.path.expanduser('~'), 'downloads')
+
+    @staticmethod
+    def dict_to_string(dictionary):
+        result = []
+        for key in dictionary:
+            result.append(f"{key}: {dictionary[key]}")
+        return '\n'.join(result)
