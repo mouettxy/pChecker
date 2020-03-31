@@ -1,4 +1,6 @@
+import csv
 import inspect
+from pathlib import Path
 
 from MSOCONSTANTS import msoOrientationHorizontal
 from PresentationExamLayouts import PresentationExamLayouts as Layouts
@@ -310,3 +312,25 @@ class PresentationExamAnalyze(object):
         if shape_animations:
             warnings[0].append(f"Найдены анимации в объектах: {shape_animations}.")
         return warnings
+
+    def export_csv(self):
+        warnings = self.warnings
+        presentation, structure, fonts, images, layout, grade = self.get()
+        warn_0, warn_1, warn_2, warn_3 = warnings[0], warnings[1], warnings[2], warnings[3]
+        path = Path.joinpath(Path(self._Utils.get_download_path()), self._Presentation.Name + ".csv")
+        fieldnames = ['Презентация', 'Структура', 'Шрифты', 'Картинки', 'Предупреждения', 'Слайд 1', 'Слайд 2',
+                      'Слайд 3']
+        with open(path, "w", newline='', encoding="windows-1251") as fCsv:
+            writer = csv.writer(fCsv, delimiter=',')
+            writer.writerow(fieldnames)
+            writer.writerow([
+                self._Utils.dict_to_string(presentation),
+                self._Utils.dict_to_string(structure),
+                self._Utils.dict_to_string(fonts),
+                self._Utils.dict_to_string(images),
+                '\n'.join(warn_0),
+                '\n'.join(warn_1),
+                '\n'.join(warn_2),
+                '\n'.join(warn_3),
+            ])
+        return path
