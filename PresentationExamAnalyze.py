@@ -282,8 +282,9 @@ class PresentationExamAnalyze(object):
 
             for Shape in Slide.Shapes:
                 crop = self._Utils.get_shape_crop_values(Shape)
-                crop_warning = (f'Картинка {Shape.Name} с ID {Shape.Id} обрезана слева/справа/сверху/cнизу на '
-                                f'{crop["left"]}/{crop["right"]}/{crop["top"]}/{crop["bottom"]}')
+                if crop:
+                    crop_warning = (f'Картинка {Shape.Name} с ID {Shape.Id} обрезана слева/справа/сверху/cнизу на '
+                                    f'{crop["left"]}/{crop["right"]}/{crop["top"]}/{crop["bottom"]}')
                 if Slide.SlideIndex == 1:
                     if self._Utils.is_image(Shape):
                         warnings[1].append(f"Изображение {Shape.Name} с ID {Shape.Id}")
