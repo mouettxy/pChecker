@@ -39,7 +39,7 @@ class PresentationExam(object):
 
     @property
     def Utils(self):
-        return self._Presentation
+        return self._Utils
 
     @property
     def Presentation(self):
