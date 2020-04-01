@@ -278,40 +278,40 @@ class PresentationExamAnalyze(object):
             if Slide.TimeLine.MainSequence.Count >= 1:
                 shape_animations += Slide.TimeLine.MainSequence.Count
             if Slide.SlideShowTransition.EntryEffect:
-                warnings[0].append(f"Найдена анимация перехода на слайде номер {Slide.SlideIndex}.")
+                warnings[0].append(f"Анимация перехода на слайде {Slide.SlideIndex}.")
 
             for Shape in Slide.Shapes:
                 crop = self._Utils.get_shape_crop_values(Shape)
                 if crop:
-                    crop_warning = (f'Картинка {Shape.Name} с ID {Shape.Id} обрезана слева/справа/сверху/cнизу на '
-                                    f'{crop["left"]}/{crop["right"]}/{crop["top"]}/{crop["bottom"]}')
+                    crop_warning = (f'Объект {Shape.Name}, {Shape.Id} обрезан {crop["left"]}:{crop["right"]}:'
+                                    f':{crop["top"]}:{crop["bottom"]}')
                 if Slide.SlideIndex == 1:
                     if self._Utils.is_image(Shape):
                         warnings[1].append(f"Изображение {Shape.Name} с ID {Shape.Id}")
                     elif self._Utils.is_text(Shape) is True:
                         slide_1_text_blocks += 1
                     elif self._Utils.is_text(Shape) is None:
-                        warnings[1].append(f"Пустой текстовый блок {Shape.Name} с ID {Shape.Id}")
+                        warnings[1].append(f"Пустой текстовый блок {Shape.Name}, {Shape.Id}")
                     elif not self._Utils.is_text(Shape):
-                        warnings[1].append(f"Неопознаный тип обьекта {Shape.Name} с ID {Shape.Id}")
+                        warnings[1].append(f"Неизвестный объект {Shape.Name}, {Shape.Id}")
                     if slide_1_text_blocks > 2:
                         warnings[1].append(f"Больше двух текстовых элементов на слайде.")
                 elif Slide.SlideIndex == 2:
                     if self._Utils.is_text(Shape) is None:
-                        warnings[2].append(f"Пустой текстовый блок {Shape.Name} с ID {Shape.Id}")
+                        warnings[2].append(f"Пустой текстовый блок {Shape.Name}, {Shape.Id}")
                     elif not self._Utils.is_text(Shape) and not self._Utils.is_image(Shape):
-                        warnings[2].append(f"Неопознаный тип обьекта {Shape.Name} с ID {Shape.Id}")
+                        warnings[2].append(f"Неизвестный объект {Shape.Name}, {Shape.Id}")
                     if crop:
                         warnings[2].append(crop_warning)
                 elif Slide.SlideIndex == 3:
                     if self._Utils.is_text(Shape) is None:
-                        warnings[3].append(f"Пустой текстовый блок {Shape.Name} с ID {Shape.Id}")
+                        warnings[3].append(f"Пустой текстовый блок {Shape.Name}, {Shape.Id}")
                     elif not self._Utils.is_text(Shape) and not self._Utils.is_image(Shape):
-                        warnings[3].append(f"Неопознаный тип обьекта {Shape.Name} с ID {Shape.Id}")
+                        warnings[3].append(f"Неизвестный объект {Shape.Name} с ID {Shape.Id}")
                     if crop:
                         warnings[3].append(crop_warning)
         if shape_animations:
-            warnings[0].append(f"Найдены анимации в объектах: {shape_animations}.")
+            warnings[0].append(f"Анимации в объектах: {shape_animations}.")
         return warnings
 
     def export_csv(self):
