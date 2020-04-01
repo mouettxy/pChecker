@@ -142,8 +142,17 @@ class PresentationExamUtils(object):
             return os.path.join(os.path.expanduser('~'), 'downloads')
 
     @staticmethod
-    def dict_to_string(dictionary):
-        result = []
-        for key in dictionary:
-            result.append(f"{key}: {dictionary[key]}")
-        return '\n'.join(result)
+    def dict_to_string(dictionary, qml_color_wrongs=None):
+        if qml_color_wrongs:
+            qml_result = []
+            for key in dictionary:
+                if dictionary[key] == "Не выполнено":
+                    qml_result.append(f"{key}: <font color='red'>{dictionary[key]}</font>.")
+                else:
+                    qml_result.append(f"{key}: <font color='green'>{dictionary[key]}</font>.")
+            return qml_result
+        else:
+            result = []
+            for key in dictionary:
+                result.append(f"{key}: {dictionary[key]}")
+            return '\n'.join(result)
