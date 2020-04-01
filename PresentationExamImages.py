@@ -159,7 +159,7 @@ class PresentationExamImages(object):
         if Path(path).exists():
             return self.__compare_images(path=path)
         else:
-            return "Не загружены изображения."
+            return False
 
     def get(self, typeof="screenshot", lt="layout_1"):
         if typeof == "screenshot":
