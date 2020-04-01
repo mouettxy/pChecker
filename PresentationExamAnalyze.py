@@ -131,7 +131,7 @@ class PresentationExamAnalyze(object):
         elif text_blocks == 3 and not analyze[7]:
             analyze[7], analyze[11] = True, True
         elif text_blocks == 2 and not analyze[7]:
-            analyze[7], analyze[11] = True, False
+            analyze[7], analyze[11] = False, True
         else:
             analyze[7], analyze[11] = False, False
         if len(overlaps) == 1:
@@ -152,7 +152,7 @@ class PresentationExamAnalyze(object):
         elif text_blocks == 4 and not analyze[7]:
             analyze[7], analyze[11] = True, True
         elif text_blocks == 3 and not analyze[7]:
-            analyze[7], analyze[11] = True, False
+            analyze[7], analyze[11] = False, True
         else:
             analyze[7], analyze[11] = False, False
         if len(overlaps) == 1:
@@ -228,6 +228,10 @@ class PresentationExamAnalyze(object):
                                                         self.__analyze_slide_2())
         if self._Presentation.Slides.Count >= 3:
             third_slide = self.__analyze_slide_3()
+            print(presentation_info)
+            print(first_slide)
+            print(second_slide)
+            print(third_slide)
             data = {**presentation_info, **first_slide, **second_slide, **third_slide}
             err_structure = [data[k] for k in data if k in [0, 5, 7, 8, 9, 11, 12]].count(False)
             err_fonts = [data[k] for k in data if k in [3, 10]].count(False)
